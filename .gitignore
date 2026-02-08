@@ -1,0 +1,17 @@
+# Dependencies and build
+node_modules
+dist
+coverage
+*.tsbuildinfo
+
+# Environment (do not commit secrets)
+.env
+.env.*
+!.env.test.e2e
+
+# Logs and OS
+*.log
+.DS_Store
+
+# Turbo
+.turbo
