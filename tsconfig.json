@@ -22,7 +22,9 @@
   },
   "files": [],
   "references": [
-    { "path": "./packages/utils-core" }
+    { "path": "./packages/utils-core" },
+    { "path": "./packages/frame-vue" },
+    { "path": "./packages/frame-nuxt" }
   ],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

@@ -13,5 +13,9 @@ coverage
 *.log
 .DS_Store
 
+# Nuxt
+.nuxt
+.output
+
 # Turbo
 .turbo

@@ -1,0 +1,40 @@
+{
+  "name": "@mtngtools/frame-nuxt",
+  "version": "0.1.0",
+  "description": "Nuxt module and layer library for mtngTOOLS",
+  "type": "module",
+  "exports": {
+    "./modules/frame-vue": {
+      "types": "./dist/modules/frame-vue.d.ts",
+      "import": "./dist/modules/frame-vue.js"
+    },
+    "./layers/base": "./layers/base"
+  },
+  "files": ["dist", "layers"],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src"
+  },
+  "peerDependencies": {
+    "nuxt": ">=4.0.0"
+  },
+  "dependencies": {
+    "@mtngtools/frame-vue": "workspace:*"
+  },
+  "devDependencies": {
+    "@nuxt/kit": "4.3.0",
+    "@nuxt/schema": "4.3.0",
+    "nuxt": "4.3.0",
+    "oxlint": "^1.26.0",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.7.0",
+    "vite": "8.0.0-beta.13",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": ["nuxt", "nuxt-module", "mtngtools"],
+  "license": "MIT",
+  "publishConfig": { "access": "public" }
+}

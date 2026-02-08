@@ -4,7 +4,8 @@ Shared packages for the mtngTOOLS suite (medical conference video platforms). Th
 
 ## Layout
 
-- **`packages/*`** — Publishable libraries (e.g. utils-core).
+- **`packages/*`** — Publishable libraries (e.g. utils-core, frame-vue, frame-nuxt).
+- **`apps/*`** — Reference applications (COMPOSE layer, e.g. compose-ref-attend-aws-nuxt-mux).
 - **`sub/*`** — Git submodules (e.g. [mtngtools/hls](https://github.com/mtngtools/hls) at `sub/hls` — HLS packages + CLI). See [SUBMODULES.md](./SUBMODULES.md) and [sub/README.md](./sub/README.md).
 
 ## Packages
@@ -12,6 +13,14 @@ Shared packages for the mtngTOOLS suite (medical conference video platforms). Th
 | Package | Description |
 | :--- | :--- |
 | `@mtngtools/utils-core` | Core utility functions shared across packages. |
+| `@mtngtools/frame-vue` | Vue.js component and composable library (for use via Nuxt module). |
+| `@mtngtools/frame-nuxt` | Nuxt modules and layers (e.g. `modules/frame-vue`, `layers/base`, `layers/admin`). |
+
+## Apps (COMPOSE)
+
+| App | Description |
+| :--- | :--- |
+| `compose-ref-attend-aws-nuxt-mux` | Reference attendee site — AWS + Nuxt + Mux. |
 
 ## Submodules
 

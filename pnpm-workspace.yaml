@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'apps/*'
   # HLS submodule: include its packages so they use this repo's lockfile.
   # Remove pnpm-workspace.yaml and pnpm-lock.yaml from the hls repo (sub/hls) for that to work.
   - 'sub/hls/packages/*'
