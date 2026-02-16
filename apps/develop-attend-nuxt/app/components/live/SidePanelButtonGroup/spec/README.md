@@ -1,27 +1,49 @@
 # SidePanelButtonGroup
 
-Groups `SidePanelControlButton` instances together. Handles layout and positioning of the button cluster, adapting which buttons are shown based on the current viewport (above/below `sidePanelBreakpoint`).
+Control cluster for selecting side panel modes.
 
-## Responsibilities
+Shared contracts are defined in `app/components/live/spec/CONTRACTS.md`.
 
-- Renders one `SidePanelControlButton` per available state.
-- Above breakpoint: shows buttons for `right`, `bottom`, `full`, `minimized`.
-- Below breakpoint: shows buttons for `full`, `minimized` only.
-- Highlights the currently active state.
+## V1 Responsibilities
+
+- Render one control per currently available selectable state.
+- Reflect selected and resolved state for visual affordances.
+- Request mode changes through parent wiring; do not resolve `auto`.
 
 ## API
 
 ### Props
 
-| Name              | Type                                                       | Default     | Description                                  |
-| :---------------- | :--------------------------------------------------------- | :---------- | :------------------------------------------- |
-| `modelValue`      | `'right' \| 'bottom' \| 'full' \| 'minimized'`             | —           | Current active state (`v-model`).            |
-| `availableStates` | `Array<string>`                                            | all states  | Which states are available at this viewport. |
+| Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `sidePanelMode` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Selected mode (source for active selected control). |
+| `sidePanelModeResolved` | `'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Resolved mode (source for resolved-state cues). |
+| `availableStates` | `Array<'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'>` | `[]` | Modes currently selectable in this viewport/context. |
+| `overlayOnly` | `boolean` | `false` | Overlay-only behavior hint for control styling and close interactions. |
 
 ### Emits
 
-- `update:modelValue` — When user selects a new state.
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `setSidePanelMode` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'` | Requests selected mode change. |
+| `closeSidePanel` | none | Optional close action for overlay-only contexts. |
 
 ### Slots
 
-- **`default`**: Override with custom buttons if needed.
+| Name | Optional | Behavior |
+| :--- | :---: | :--- |
+| `default` | ✓ | Override group rendering and custom control composition. |
+
+## Behavior Rules (V1)
+
+- `auto` is included as a selectable state when present in `availableStates`.
+- `LiveFrame` owns `auto` resolution; group only sends requests.
+- Controls for unavailable states should not be rendered (or should be disabled if explicitly configured).
+- In resolved `none` mode, group should not render panel mode controls.
+
+## Testing Requirements (V1)
+
+- Renders exactly the controls represented by `availableStates`.
+- Supports `auto` control display and selection requests.
+- Emits requested mode on interaction.
+- Honors resolved `none` mode by suppressing panel control rendering.
