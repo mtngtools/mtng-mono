@@ -1,21 +1,38 @@
 # SidePanelOverlay
 
-Backdrop/scrim rendered behind the side panel when in `full` mode. Clicking the overlay closes or minimizes the panel.
+Backdrop for full-mode side panel presentation.
 
-## Responsibilities
+Shared contracts are defined in `app/components/live/spec/CONTRACTS.md`.
 
-- Renders a semi-transparent backdrop over the main content area.
-- Only visible when side panel is in `full` state.
-- Emits a close event on click.
+## V1 Responsibilities
+
+- Render a scrim behind side panel UI when resolved mode is `full`.
+- Provide close interaction for overlay-only workflow.
 
 ## API
 
 ### Props
 
-| Name      | Type      | Default | Description                              |
-| :-------- | :-------- | :------ | :--------------------------------------- |
-| `visible` | `boolean` | `false` | Whether the overlay is shown.            |
+| Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `visible` | `boolean` | `false` | Whether overlay is shown. |
+| `overlayOnly` | `boolean` | `false` | Whether close behavior should use overlay-only semantics. |
+| `sidePanelModeResolved` | `'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Current resolved mode for visibility guards. |
 
 ### Emits
 
-- `close` — When the overlay is clicked (signals panel should minimize/close).
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `closeSidePanel` | none | Requests minimize/close action (mapped by parent/`LiveFrame`). |
+
+## Behavior Rules (V1)
+
+- Overlay should only render as interactive when resolved mode is `full` and `visible` is true.
+- Close interaction is intended for overlay-only contexts.
+- In resolved `none` mode, overlay must not render.
+
+## Testing Requirements (V1)
+
+- Renders only in full-mode visible state.
+- Emits close request on overlay click/tap.
+- Does not render in resolved `none` mode.

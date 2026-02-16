@@ -1,49 +1,57 @@
 # SidePanelFrame
 
-Container component that wraps the side panel content. Provides the visual chrome (background, border, overflow) and manages its own positioning within the `LiveFrame` middle area based on the current `sidePanelPosition` state.
+Container/chrome for side panel content rendered inside the `LiveFrame` `sidePanel` slot.
 
-Intended to be placed into the `LiveFrame`'s `sidePanel` slot.
+Canonical shared types and contract rules are defined in `app/components/live/spec/CONTRACTS.md`.
 
-## Responsibilities
+## V1 Responsibilities
 
-- Receives `position` state from `LiveFrame` (or internal composable).
-- Applies correct CSS for each state (`right`, `bottom`, `full`, `minimized`).
-- Handles sizing within `min`/`max` constraints (for `right` and `bottom`).
-- Manages overflow/scroll of its slotted content.
-- Composes sub-components (`SidePanelHeader`, `SidePanelButtonGroup`, `SidePanelOverlay`) with optional slot overrides.
+- Render panel shell based on resolved mode from `LiveFrame`.
+- Apply mode-specific sizing constraints.
+- Compose optional sub-slots (`header`, `buttonGroup`, `overlay`) without owning mode-resolution logic.
+- Expose a predictable structure that works with `LiveFrame` selected/resolved mode contracts.
 
 ## API
 
 ### Props
 
-| Name       | Type                                                       | Default     | Description                          |
-| :--------- | :--------------------------------------------------------- | :---------- | :----------------------------------- |
-| `position` | `'right' \| 'bottom' \| 'full' \| 'minimized'`             | `'right'`   | Current resolved position state.     |
-| `minWidth` | `string`                                                   | `'320px'`   | Min width in `right` mode.           |
-| `maxWidth` | `string`                                                   | `'480px'`   | Max width in `right` mode.           |
-| `minHeight`| `string`                                                   | `'200px'`   | Min height in `bottom` mode.         |
-| `maxHeight`| `string`                                                   | `'400px'`   | Max height in `bottom` mode.         |
+| Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `sidePanelMode` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Selected mode from `LiveFrame`. |
+| `sidePanelModeResolved` | `'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Resolved render mode from `LiveFrame`. |
+| `availableStates` | `Array<'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'>` | `[]` | Selectable states in current context. |
+| `overlayOnly` | `boolean` | `false` | Whether controls should use overlay-only behavior. |
+| `minWidth` | `string` | `'320px'` | Minimum width when resolved mode is `right`. |
+| `maxWidth` | `string` | `'480px'` | Maximum width when resolved mode is `right`. |
+| `minHeight` | `string` | `'200px'` | Minimum height when resolved mode is `bottom`. |
+| `maxHeight` | `string` | `'400px'` | Maximum height when resolved mode is `bottom`. |
+
+### Emits
+
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `setSidePanelMode` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'` | Requests a selected mode change via `LiveFrame` handler wiring. |
+| `closeSidePanel` | none | Requests close action. Valid only when `overlayOnly === true`. |
 
 ### Slots
 
 | Name | Optional | Behavior |
-| :--- | :------: | :--- |
-| **`default`** | | Panel content (e.g., iframe, widget). |
-| **`header`** | ✓ | Defaults to `SidePanelHeader`. Override to provide custom panel header/title bar. |
-| **`buttonGroup`** | ✓ | Defaults to `SidePanelButtonGroup`. Override to provide custom control buttons. |
-| **`overlay`** | ✓ | Defaults to `SidePanelOverlay`. Override to provide custom backdrop in `full` mode. |
+| :--- | :---: | :--- |
+| `default` |  | Panel content. |
+| `header` | ✓ | Header region; defaults to `SidePanelHeader` behavior when implemented. |
+| `buttonGroup` | ✓ | Controls region; defaults to `SidePanelButtonGroup` behavior when implemented. |
+| `overlay` | ✓ | Overlay region for `full` mode interactions. |
 
-## Design Constraints
+## Behavior Rules (V1)
 
-> [!IMPORTANT]
-> A future `MultiContentSidePanelFrame` will extend this pattern to support multiple switchable content areas (e.g., questions, polling, chat) with tab-like navigation. **Do not build this now**, but the current `SidePanelFrame` must not make it harder to build later.
+- Do not resolve `auto`; always use `sidePanelModeResolved` for layout classes and structure.
+- Respect `overlayOnly` for control affordances and close behavior.
+- In `none` resolved mode, frame chrome should not render side-panel structure.
+- Keep component focused on frame/chrome concerns only.
 
-To support this:
-- The `default` slot should remain the **sole content insertion point**. `MultiContentSidePanelFrame` will manage its own internal content switching and pass it through.
-- Props should stay focused on **frame concerns** (position, sizing) — not content-specific logic.
-- Internal layout (header, content, overlay) should be composable, not tightly coupled.
-- Avoid assumptions about the number or type of content areas.
+## Testing Requirements (V1)
 
-### Planned
-
-- **`MultiContentSidePanelFrame`** — Wraps or extends `SidePanelFrame` with tab/selector UI for switching between multiple content panels (questions, polling, chat, etc.). Avoid implementation that would make this more difficult in future. 
+- Renders expected structure per `sidePanelModeResolved` value.
+- Applies sizing props in `right` and `bottom`.
+- No panel chrome render when resolved mode is `none`.
+- Emits mode/close requests from user interactions without owning resolution.

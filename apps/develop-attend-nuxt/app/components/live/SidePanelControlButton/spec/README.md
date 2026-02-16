@@ -1,57 +1,57 @@
 # SidePanelControlButton
 
-Individual button representing a single side panel state. Rendered within `SidePanelButtonGroup`.
+Single mode control used by `SidePanelButtonGroup`.
 
-## Responsibilities
+Shared contracts are defined in `app/components/live/spec/CONTRACTS.md`.
 
-- Displays an icon or label for its target state.
-- Emits a click event to switch to that state.
-- Visually indicates when it is the active state.
+## V1 Responsibilities
+
+- Represent one selectable mode action.
+- Show active/inactive visual state.
+- Emit selection intent.
 
 ## API
 
 ### Props
 
-| Name     | Type                                                                  | Default | Description                            |
-| :------- | :-------------------------------------------------------------------- | :------ | :------------------------------------- |
-| `state`  | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'`              | —       | The state this button represents.      |
-| `active` | `boolean`                                                             | `false` | Whether this is the currently active state. |
+| Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `state` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'` | — | Selectable mode this control targets. |
+| `active` | `boolean` | `false` | Whether this control is active in selected-mode terms. |
+| `activeResolved` | `boolean` | `false` | Whether this control matches current resolved mode. |
+| `disabled` | `boolean` | `false` | Whether this control can currently be activated. |
 
 ### Emits
 
-- `click` — When the button is pressed.
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `click` | `'auto' \| 'right' \| 'bottom' \| 'full' \| 'minimized'` | Selection request payload for parent/group wiring. |
 
 ### Slots
 
 | Name | Optional | Behavior |
-| :--- | :------: | :--- |
-| **`icon`** | ✓ | Override the default icon for this state. |
-| **`label`** | ✓ | Override the default label text for this state. |
+| :--- | :---: | :--- |
+| `icon` | ✓ | Override icon rendering. |
+| `label` | ✓ | Override label rendering. |
 
-### Icons & Labels
+## Default Label Mapping (V1)
 
-Each state has a default icon and label. Options for rendering icons:
-- [Nuxt Icon](https://nuxt.com/modules/icon) module (e.g., `<Icon name="..." />`)
-- Custom inline SVG elements if a precise design is needed
+| State | Label |
+| :--- | :--- |
+| `auto` | `Auto` |
+| `right` | `Right` |
+| `bottom` | `Bottom` |
+| `full` | `Full` |
+| `minimized` | `Minimize` |
 
-Default mapping:
+## Behavior Rules (V1)
 
-| State | Icon Concept | Default Label |
-| :--- | :--- | :--- |
-| `auto` | Auto / smart layout | Auto |
-| `right` | Panel docked right | Right |
-| `bottom` | Panel docked bottom | Bottom |
-| `full` | Expand / maximize | Full |
-| `minimized` | Collapse / minimize | Minimize |
+- If `disabled`, clicks must not emit.
+- Visual distinction should support selected and resolved cues where both are provided.
+- Accessibility and advanced responsive display variants are out of V1 scope for this spec pass.
 
-### Responsive Display
+## Testing Requirements (V1)
 
-How the icon and label render should adapt based on viewport size and current control state:
-
-- **Large viewport / expanded controls**: Icon + visible label text.
-- **Medium viewport / compact controls**: Icon only; label as tooltip on hover.
-- **Small viewport / overlay mode**: Icon only; label as tooltip on tap/hover.
-  - **Note**: The visual treatment may differ significantly between "open" (expand) and "close" (minimize) actions in overlay mode.
-  - **Minimized**: May appear as a floating action button (FAB) or distinct toggle.
-  - **Full**: Should be clearly a "Close" or "Minimize" action (e.g., top-right 'X'), distinct from the navigation controls.
-- Label visibility may also depend on the button group's own layout constraints (e.g., vertical vs. horizontal arrangement).
+- Emits expected payload on click when enabled.
+- Does not emit when disabled.
+- Active/activeResolved visual state props are applied as expected.
