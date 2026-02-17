@@ -1,5 +1,8 @@
 # @mtngtools/frame-vue
 
+> [!WARNING]
+> This package is currently **experimental** and in early development. APIs are subject to frequent breaking changes.
+
 Vue.js component and composable library for mtngTOOLS. Built for use in Nuxt apps via a Nuxt module (to be added).
 
 ## Contents
