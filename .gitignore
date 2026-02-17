@@ -8,10 +8,12 @@ coverage
 .env
 .env.*
 !.env.test.e2e
+!packages/frame-vue/.env.test.browser
 
 # Logs and OS
 *.log
 .DS_Store
+**/__screenshots__/
 
 # Nuxt
 .nuxt

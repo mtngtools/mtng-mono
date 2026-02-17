@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@source "../../../packages/frame-vue/src";
+
+@theme {
+  /* You can also define shades */
+  --color-accent: #c22032;
+  --color-accent-50: #fef2f3;
+  --color-accent-100: #fce4e6;
+  --color-accent-200: #f9cbd0;
+  --color-accent-300: #f4a4ad;
+  --color-accent-400: #ec707e;
+  --color-accent-500: #df4455;
+  --color-accent-600: #d02d3f;
+  --color-accent-700: #c22032;
+  /* Your primary color */
+  --color-accent-800: #a11b2a;
+  --color-accent-900: #861a27;
+  --color-accent-950: #4a0910;
+
+}

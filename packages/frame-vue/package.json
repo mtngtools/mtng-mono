@@ -1,7 +1,7 @@
 {
   "name": "@mtngtools/frame-vue",
-  "version": "0.1.0",
-  "description": "Vue.js component and composable library for mtngTOOLS",
+  "version": "0.0.7-experimental.0",
+  "description": "(Experimental) Vue.js component and composable library for mtngTOOLS",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -12,27 +12,56 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
+    "watch": "vite build --watch",
     "dev": "vite build --watch",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint src"
+    "lint": "oxlint src",
+    "test": "vitest run --exclude=\"**/*.browser.test.ts\"",
+    "test:verbose": "vitest run --exclude=\"**/*.browser.test.ts\" --reporter=verbose",
+    "test:ui": "vitest --exclude=\"**/*.browser.test.ts\" --ui",
+    "test:browser:install": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium",
+    "test:browser": "set -a; [ -f ./.env.test.browser ] && . ./.env.test.browser; [ -f ./.env.test.browser.local ] && . ./.env.test.browser.local; set +a; PLAYWRIGHT_BROWSERS_PATH=\"$(cd ../.. && pwd)/node_modules/.pnpm/playwright-core@1.58.2/node_modules/playwright-core/.local-browsers\" vitest run --browser --reporter=verbose src/components/live/LiveFrame/index.browser.test.ts --disableConsoleIntercept",
+    "test:browser:ui": "set -a; [ -f ./.env.test.browser ] && . ./.env.test.browser; [ -f ./.env.test.browser.local ] && . ./.env.test.browser.local; set +a; PLAYWRIGHT_BROWSERS_PATH=\"$(cd ../.. && pwd)/node_modules/.pnpm/playwright-core@1.58.2/node_modules/playwright-core/.local-browsers\" vitest --browser --ui src/components/live/LiveFrame/index.browser.test.ts",
+    "test:browser:ui:verbose": "set -a; [ -f ./.env.test.browser ] && . ./.env.test.browser; [ -f ./.env.test.browser.local ] && . ./.env.test.browser.local; set +a; PLAYWRIGHT_BROWSERS_PATH=\"$(cd ../.. && pwd)/node_modules/.pnpm/playwright-core@1.58.2/node_modules/playwright-core/.local-browsers\" vitest --browser --ui src/components/live/LiveFrame/index.browser.test.ts --disableConsoleIntercept",
+    "test:min": "vitest run --exclude=\"**/*.browser.test.ts\" --reporter=dot",
+    "test:watch": "vitest --exclude=\"**/*.browser.test.ts\"",
+    "test:coverage": "vitest run --exclude=\"**/*.browser.test.ts\" --coverage",
+    "prepublishOnly": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build",
+    "publish:experimental": "pnpm publish --tag experimental --access public"
   },
   "peerDependencies": {
     "vue": ">=3.5.0"
   },
-  "keywords": ["vue", "components", "composables", "mtngtools"],
+  "keywords": [
+    "vue",
+    "components",
+    "composables",
+    "mtngtools"
+  ],
   "license": "MIT",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@vitest/ui": "^4.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.6.1",
     "oxlint": "^1.26.0",
+    "playwright": "^1.58.2",
     "rimraf": "^6.1.2",
     "typescript": "^5.7.0",
     "vite": "8.0.0-beta.13",
     "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.0",
     "vue": "^3.5.13"
   }
 }
