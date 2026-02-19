@@ -6,7 +6,11 @@ const loggedIn = ref(false)
 /**
  * Shared state for simple logged in status.
  */
-export function useSimpleLoggedIn() {
+export function useSimpleLoggedIn(initialValue?: boolean) {
+    if (initialValue !== undefined) {
+        loggedIn.value = initialValue
+    }
+
     const setToLoggedIn = () => {
         loggedIn.value = true
     }

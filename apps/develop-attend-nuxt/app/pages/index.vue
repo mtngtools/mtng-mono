@@ -5,7 +5,10 @@
       Playground routes for local component checks.
     </p>
     <NuxtLink class="mt-6 inline-block rounded-md border border-neutral-700 px-4 py-2 hover:border-neutral-500" to="/live-frame-test">
-      Open LiveFrame test page
+      LiveFrame test page
+    </NuxtLink>
+    <NuxtLink class="mt-6 inline-block rounded-md border border-neutral-700 px-4 py-2 hover:border-neutral-500" to="/logged-in-test">
+      LoggedInOut test page
     </NuxtLink>
   </main>
 </template>
