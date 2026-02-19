@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { LiveFrame, type SidePanelModeSelectable } from '@mtngtools/frame-vue';
 import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 definePageMeta({
   layout: 'live',
 });
+
+const route = useRoute();
+const hasSidePanel = computed(() => route.query.hasSidePanel !== 'false');
 
 const sidePanelPosition = ref<SidePanelModeSelectable>('minimized');
 const sidePanelModeResolved = ref<string>('none');
@@ -151,7 +155,7 @@ function onAvailableStates(payload: {
       </div>
     </div>
 
-    <template #sidePanelContent>
+    <template v-if="hasSidePanel" #sidePanelContent>
       <div
         class="text-xs text-neutral-200"
         :style="sidePanelContentStyle"

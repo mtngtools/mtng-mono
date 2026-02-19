@@ -12,9 +12,9 @@ import {
 } from '../spec/test-utils/liveScenarioRunner'
 
 export class ResizeObserverMock {
-  observe() {}
-  disconnect() {}
-  unobserve() {}
+  observe() { }
+  disconnect() { }
+  unobserve() { }
 }
 
 type BorderSide = 'top' | 'right' | 'bottom' | 'left'
@@ -23,10 +23,10 @@ type DiffComparison = 'lt' | 'lte' | 'eq' | 'gte' | 'gt'
 type ExpectedAutoResolvedMode = 'bottom' | 'right' | 'full' | 'minimized'
 type BreakPointScenarioBucket
   = 'taller-than-auto-bottom'
-    | 'wider-than-auto-right'
-    | 'between-ratios-narrower-than-controls-overlay-only'
-    | 'between-ratios-wider-than-side-panel-breakpoint'
-    | 'between-ratios-between-controls-and-side-panel-breakpoints'
+  | 'wider-than-auto-right'
+  | 'between-ratios-narrower-than-controls-overlay-only'
+  | 'between-ratios-wider-than-side-panel-breakpoint'
+  | 'between-ratios-between-controls-and-side-panel-breakpoints'
 
 interface BorderFixtureContext {
   wrapper: VueWrapper
@@ -157,11 +157,11 @@ function expectBorderStyleToMatch(element: HTMLElement, borderColors: BorderColo
   const computed = element.ownerDocument.defaultView?.getComputedStyle(element)
   const computedColors = computed
     ? [
-        computed.borderTopColor,
-        computed.borderRightColor,
-        computed.borderBottomColor,
-        computed.borderLeftColor,
-      ]
+      computed.borderTopColor,
+      computed.borderRightColor,
+      computed.borderBottomColor,
+      computed.borderLeftColor,
+    ]
     : []
   const hexToRgb = (hex: string) => {
     const n = parseInt(hex.slice(1), 16)
@@ -522,7 +522,7 @@ export function buildBorderVisibilityAndLocationAssertions(): BorderFixtureAsser
           contentEdgeValue,
           sidePanelEdgeValue: headerEdgeValue,
           actualDiff,
-        })        
+        })
 
         expect(
           actualDiff,
@@ -594,7 +594,31 @@ export function expectButtonsToBeVisible(wrapper: VueWrapper, labels: string[]) 
   }
 }
 
-function mountLiveFrameWithProps(props: Record<string, unknown>) {
+export function mountLiveFrameWithProps(props: Record<string, unknown>, slots?: Record<string, any>) {
+  const defaultSlots = {
+    header: '<div data-test="header-slot" style="height: 48px">Header</div>',
+    default: `
+      <div
+        data-test="default-content"
+        style="${buildBorderFixtureStyle(DEFAULT_CONTENT_BORDER_COLORS, '#333300')}"
+      >
+        Default content
+      </div>
+    `,
+    sidePanelContent: `
+      <div
+        data-test="side-panel-content"
+        style="${buildBorderFixtureStyle(SIDE_PANEL_CONTENT_BORDER_COLORS, '#111827')}"
+      >
+        Side panel content
+      </div>
+    `,
+  }
+
+  // If slots is provided, we merge. To omit a slot, the caller can pass it as null or undefined
+  // logic: Object.assign({}, defaultSlots, slots) will override with undefined if present.
+  // Actually, we want to allow the caller to pass an object with ONLY the slots they want.
+
   return mount(LiveFrame, {
     props: {
       sidePanelPosition: 'auto',
@@ -603,23 +627,8 @@ function mountLiveFrameWithProps(props: Record<string, unknown>) {
       ...props,
     },
     slots: {
-      header: '<div data-test="header-slot" style="height: 48px">Header</div>',
-      default: `
-        <div
-          data-test="default-content"
-          style="${buildBorderFixtureStyle(DEFAULT_CONTENT_BORDER_COLORS, '#333300')}"
-        >
-          Default content
-        </div>
-      `,
-      sidePanelContent: `
-        <div
-          data-test="side-panel-content"
-          style="${buildBorderFixtureStyle(SIDE_PANEL_CONTENT_BORDER_COLORS, '#111827')}"
-        >
-          Side panel content
-        </div>
-      `,
+      ...defaultSlots,
+      ...slots,
     },
     attachTo: document.body,
   })
@@ -705,36 +714,36 @@ export function runOncePerResolutionCheck(
     optionButtonClick?: (ctx: LiveScenarioContext<VueWrapper>) => Promise<void> | void
     expects: Array<LiveScenarioExpectation<VueWrapper>>
   }> = [
-    // 1 Load at correct size — first scenario sets browser size (no click); runner mounts at that size.
-    // 2 Run all additional (frame/comparison) assertions.
-    {
-      describeLabel: 'comparison',
-      browserSize: size,
-      waitMs,
-      expects: additionalAssertions,
-    },
-    // 4 Run all border tests before expanding: "initial border" (full set, all ~16).
-    {
-      describeLabel: 'initial border',
-      browserSize: size,
-      waitMs,
-      expects: borderExpects,
-    },
-    // 5 Confirm initialExpectedButtons are visible (frame header auto button only at load).
-    {
-      describeLabel: 'expectedButtons visible',
-      browserSize: size,
-      waitMs,
-      expects: [
-        {
-          describeLabel: 'expected state buttons visible',
-          run: ({ wrapper }) => {
-            expectButtonsToBeVisible(wrapper, initialExpectedButtons)
+      // 1 Load at correct size — first scenario sets browser size (no click); runner mounts at that size.
+      // 2 Run all additional (frame/comparison) assertions.
+      {
+        describeLabel: 'comparison',
+        browserSize: size,
+        waitMs,
+        expects: additionalAssertions,
+      },
+      // 4 Run all border tests before expanding: "initial border" (full set, all ~16).
+      {
+        describeLabel: 'initial border',
+        browserSize: size,
+        waitMs,
+        expects: borderExpects,
+      },
+      // 5 Confirm initialExpectedButtons are visible (frame header auto button only at load).
+      {
+        describeLabel: 'expectedButtons visible',
+        browserSize: size,
+        waitMs,
+        expects: [
+          {
+            describeLabel: 'expected state buttons visible',
+            run: ({ wrapper }) => {
+              expectButtonsToBeVisible(wrapper, initialExpectedButtons)
+            },
           },
-        },
-      ],
-    },
-  ]
+        ],
+      },
+    ]
 
   const sidePanelFrameVisibleExpectation: LiveScenarioExpectation<VueWrapper> = {
     describeLabel: 'side panel frame visible after state change',
@@ -764,17 +773,17 @@ export function runOncePerResolutionCheck(
       // Wait for minimized state first so we don't read stale payload and no-op (fake timers can leave emission pending).
       expects: isClose
         ? [
-            {
-              describeLabel: 'wait for minimized state before layout assertions',
-              run: async ({ wrapper }) => {
-                await waitForMinimizedState(wrapper)
-              },
+          {
+            describeLabel: 'wait for minimized state before layout assertions',
+            run: async ({ wrapper }) => {
+              await waitForMinimizedState(wrapper)
             },
-            expectHeaderExpandButtonVisibleWhenMinimized(),
-            ...buildScenarioExpectsFromBorderAssertions(buildMinimizedHeaderTopAssertions(), {
-              requireSidePanelContent: false,
-            }),
-  ]
+          },
+          expectHeaderExpandButtonVisibleWhenMinimized(),
+          ...buildScenarioExpectsFromBorderAssertions(buildMinimizedHeaderTopAssertions(), {
+            requireSidePanelContent: false,
+          }),
+        ]
         : runFullBorderSet
           ? borderExpects
           : [sidePanelFrameVisibleExpectation],
