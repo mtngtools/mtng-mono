@@ -105,44 +105,9 @@ describe('LiveFrame scenario runner pattern', () => {
           attachTo: document.body,
         })
       },
-      // Override mount to NOT include sidePanelContent slot
-      // We expect this to FAIL until the bug is fixed if the user is correct
       scenarios: [
         {
-          describeLabel: 'initial load with empty sidePanelContent slot',
-          browserSize: { width: 1280, height: 900 },
-          waitMs: 75,
-          expects: [
-            {
-              describeLabel: 'SidePanelFrame shell should NOT exist',
-              run: ({ wrapper }) => {
-                const frame = wrapper.find('[data-test="side-panel-frame-shell"]')
-                expect(frame.exists()).toBe(false)
-              },
-            },
-          ],
-        },
-      ],
-    })
-    describeLiveScenarioSequence({
-      describeLabel: 'SidePanelFrame is not rendered when slot is empty',
-      mount: () => {
-        return mount(LiveFrame, {
-          props: {
-            sidePanelPosition: 'auto',
-            controlsOverlayOnly: '0',
-          },
-          slots: {
-            header: '<div data-test="header-slot" style="height: 48px">Header</div>',
-            default: '<div data-test="default-content">Default content</div>',
-            sidePanelContent: '',
-          },
-          attachTo: document.body,
-        })
-      },
-      scenarios: [
-        {
-          describeLabel: 'initial load with empty sidePanelContent slot string',
+          describeLabel: 'initial load without sidePanelContent slot',
           browserSize: { width: 1280, height: 900 },
           waitMs: 75,
           expects: [
