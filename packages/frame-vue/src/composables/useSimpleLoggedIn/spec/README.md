@@ -8,7 +8,7 @@ Sometimes multiple components need to know if a user is "logged in" without goin
 
 ## API
 
-### `useSimpleLoggedIn()`
+### `useSimpleLoggedIn(initialValue?: boolean)`
 
 Returns an object with the following reactive state and methods:
 ## Documentation Requirements
@@ -23,7 +23,7 @@ Returns an object with the following reactive state and methods:
 ## Implementation Details
 
 - Uses `createGlobalState` from `@vueuse/core` to share state across instances.
-- Initial state is `false`.
+- Initial state is `false` unless `initialValue` is provided.
 - Uses `useToggle` from `@vueuse/core` for `toggleLoggedIn` internally if applicable, or simple logic.
 
 ## Usage Example

@@ -10,6 +10,7 @@ Vue.js component and composable library for mtngTOOLS. Built for use in Nuxt app
 | Component | Description |
 | --- | --- |
 | [`LiveFrame`](./src/components/live/LiveFrame) | Full-screen wrapper for live video players with responsive layout support. |
+| [`LoggedInOut`](./src/components/LoggedInOut) | Component that toggles content visibility based on authentication status. |
 | [`SidePanelFrame`](./src/components/live/SidePanelFrame) | Wrapper for controlling and displaying side panel content. |
 | [`SidePanelHeader`](./src/components/live/SidePanelHeader) | Standardized header component for the side panel. |
 | [`SidePanelButtonGroup`](./src/components/live/SidePanelButtonGroup) | Control group for managing panel selection buttons. |
@@ -29,8 +30,18 @@ Install in an app that already uses Vue 3 (e.g. a Nuxt app):
 pnpm add @mtngtools/frame-vue vue
 ```
 
+### Regular Imports
+
 ```ts
-import { LiveFrame } from '@mtngtools/frame-vue';
+import { LiveFrame, LoggedInOut } from '@mtngtools/frame-vue';
+```
+
+### Direct Subpath Imports
+
+For specific needs or smaller bundle sizes, you can import directly from subpaths:
+
+```ts
+import { LoggedInOut } from '@mtngtools/frame-vue/components';
 import { useSimpleLoggedIn } from '@mtngtools/frame-vue/composables';
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "@mtngtools/frame-vue",
-  "version": "0.0.9-experimental.0",
+  "version": "0.0.11-experimental.0",
   "description": "(Experimental) Vue.js component and composable library for mtngTOOLS",
   "type": "module",
   "main": "./dist/index.js",
