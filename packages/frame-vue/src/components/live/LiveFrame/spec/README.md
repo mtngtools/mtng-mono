@@ -200,6 +200,7 @@ When `sidePanelContent` is absent:
 
 - `sidePanelMode = 'none'`
 - `sidePanelModeResolved = 'none'`
+- `SidePanelFrame` component must NOT be rendered in the DOM.
 - Incoming `sidePanelPosition` is accepted but ignored for layout logic.
 - Side-panel-related emits are suppressed.
 - `defaultSlotResize` is suppressed.
@@ -236,6 +237,7 @@ Tests in `index.test.ts` should cover:
 - Non-overlay structural behavior: in resolved `right` and `bottom`, `main` and side panel occupy separate `article` tracks.
 - `sidePanelAvailableStates` emission behavior (initial emit + change-only emits + `none` entry behavior).
 - None-mode suppression behavior for side-panel-related emits and `defaultSlotResize`.
+- None-mode DOM behavior: verify that `SidePanelFrame` is not rendered when `sidePanelContent` slot is absent.
 - Auto-hide rules including tall-viewport entry/exit behavior.
 - Event assertion strictness: presence-only for transition-related event checks.
 

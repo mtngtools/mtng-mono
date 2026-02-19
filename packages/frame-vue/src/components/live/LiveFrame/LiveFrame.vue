@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch, type CSSProperties } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch, Comment, Text, type CSSProperties } from 'vue'
 
 import SidePanelFrame from '../SidePanelFrame/SidePanelFrame.vue'
 import type {
@@ -105,7 +105,16 @@ const breakpointsPx: Record<string, number> = {
   '2xl': 1536,
 }
 
-const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent))
+const hasSidePanelSlot = computed(() => {
+  if (!slots.sidePanelContent) return false
+  const content = slots.sidePanelContent()
+  return content.length > 0 && content.some(node => {
+    if (node.type === Comment) return false
+    if (Array.isArray(node.children) && node.children.length === 0) return false
+    if (node.type === Text && !String(node.children).trim()) return false
+    return true
+  })
+})
 const hasHeaderSlot = computed(() => Boolean(slots.header))
 
 // User cannot select 'auto' from controls; it is still used internally and when expanding from minimized.
@@ -816,7 +825,7 @@ onBeforeUnmount(() => {
       />
 
       <div
-        v-if="$slots.sidePanelContent && sidePanelModeResolved !== 'none'"
+        v-if="hasSidePanelSlot && sidePanelModeResolved !== 'none'"
         class=""
         :style="sidePanelMountStyle"
       >
