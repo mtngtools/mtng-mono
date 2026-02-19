@@ -3,12 +3,23 @@
 > [!WARNING]
 > This package is currently **experimental** and in early development. APIs are subject to frequent breaking changes.
 
-Vue.js component and composable library for mtngTOOLS. Built for use in Nuxt apps via a Nuxt module (to be added).
+Vue.js component and composable library for mtngTOOLS. Built for use in Nuxt apps via a Nuxt module.
 
-## Contents
+## Components
 
-- **Components** — Vue 3 SFCs (Composition API). Sample: `SampleGreeting`.
-- **Composables** — Shared logic. Sample: `useCounter`.
+| Component | Description |
+| --- | --- |
+| [`LiveFrame`](./src/components/live/LiveFrame) | Full-screen wrapper for live video players with responsive layout support. |
+| [`SidePanelFrame`](./src/components/live/SidePanelFrame) | Wrapper for controlling and displaying side panel content. |
+| [`SidePanelHeader`](./src/components/live/SidePanelHeader) | Standardized header component for the side panel. |
+| [`SidePanelButtonGroup`](./src/components/live/SidePanelButtonGroup) | Control group for managing panel selection buttons. |
+| [`SidePanelControlButton`](./src/components/live/SidePanelControlButton) | Interactive button for switching side panel states. |
+
+## Composables
+
+| Composable | Description |
+| --- | --- |
+| [`useSimpleLoggedIn`](./src/composables/useSimpleLoggedIn) | Shared reactive state for basic mobile/web "logged in" status. |
 
 ## Usage
 
@@ -19,10 +30,9 @@ pnpm add @mtngtools/frame-vue vue
 ```
 
 ```ts
-import { SampleGreeting, useCounter } from '@mtngtools/frame-vue';
+import { LiveFrame } from '@mtngtools/frame-vue';
+import { useSimpleLoggedIn } from '@mtngtools/frame-vue/composables';
 ```
-
-In a Nuxt app, a Nuxt module can register these for auto-import (module to be created separately).
 
 ## Requirements
 
