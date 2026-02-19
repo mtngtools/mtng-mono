@@ -16,9 +16,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        components: resolve(__dirname, 'src/components/index.ts'),
+        composables: resolve(__dirname, 'src/composables/index.ts'),
+      },
       formats: ['es'],
-      fileName: () => 'index.js',
     },
     rollupOptions: {
       external: ['vue'],
