@@ -122,5 +122,39 @@ describe('LiveFrame scenario runner pattern', () => {
         },
       ],
     })
+    describeLiveScenarioSequence({
+      describeLabel: 'SidePanelFrame is not rendered when disableSidePanel is true',
+      mount: () => {
+        return mount(LiveFrame, {
+          props: {
+            sidePanelPosition: 'auto',
+            controlsOverlayOnly: '0',
+            disableSidePanel: true,
+          },
+          slots: {
+            header: '<div data-test="header-slot" style="height: 48px">Header</div>',
+            default: '<div data-test="default-content">Default content</div>',
+            sidePanelContent: '<div data-test="side-panel-content">Side panel content</div>',
+          },
+          attachTo: document.body,
+        })
+      },
+      scenarios: [
+        {
+          describeLabel: 'initial load with sidePanelContent slot but disabled',
+          browserSize: { width: 1280, height: 900 },
+          waitMs: 75,
+          expects: [
+            {
+              describeLabel: 'SidePanelFrame shell should NOT exist',
+              run: ({ wrapper }) => {
+                const frame = wrapper.find('[data-test="side-panel-frame-shell"]')
+                expect(frame.exists()).toBe(false)
+              },
+            },
+          ],
+        },
+      ],
+    })
   })
 })

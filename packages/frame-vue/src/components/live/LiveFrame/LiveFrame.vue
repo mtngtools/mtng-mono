@@ -28,6 +28,7 @@ const props = withDefaults(
     sidePanelMaxBottomTall?: string
     headerHideWidthThreshold?: string
     headerHideHeightThreshold?: string
+    disableSidePanel?: boolean
   }>(),
   {
     sidePanelPosition: 'minimized',
@@ -46,6 +47,7 @@ const props = withDefaults(
     sidePanelMaxBottomTall: '60vh',
     headerHideWidthThreshold: '50rem',
     headerHideHeightThreshold: '40rem',
+    disableSidePanel: false,
   },
 )
 
@@ -105,7 +107,7 @@ const breakpointsPx: Record<string, number> = {
   '2xl': 1536,
 }
 
-const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent))
+const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent) && !props.disableSidePanel)
 const hasHeaderSlot = computed(() => Boolean(slots.header))
 
 // User cannot select 'auto' from controls; it is still used internally and when expanding from minimized.

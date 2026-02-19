@@ -41,8 +41,9 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `sidePanelMinBottom` | `string` | `'12.5rem'` | Minimum side panel height in `bottom`. |
 | `sidePanelMaxBottom` | `string` | `'30vh'` | Standard side panel height cap in `bottom`. |
 | `sidePanelMaxBottomTall` | `string` | `'60vh'` | Height cap when `auto` resolves to `bottom` from tall aspect ratio. |
-| `headerHideWidthThreshold` | `string` | `'800px'` | Viewport width below which the header is hidden. |
-| `headerHideHeightThreshold` | `string` | `'640px'` | Viewport height below which the header is hidden. |
+| `headerHideWidthThreshold` | `string` | `'50rem'` | Viewport width below which the header is hidden. |
+| `headerHideHeightThreshold` | `string` | `'40rem'` | Viewport height below which the header is hidden. |
+| `disableSidePanel` | `boolean` | `false` | When `true`, the side panel system is disabled even if `sidePanelContent` slot is provided. |
 
 ### Emits
 
@@ -196,7 +197,7 @@ Required semantic/container structure:
 
 ### None Mode Behavior (V1)
 
-When `sidePanelContent` is absent:
+When `sidePanelContent` is absent OR `disableSidePanel` is `true`:
 
 - `sidePanelMode = 'none'`
 - `sidePanelModeResolved = 'none'`
