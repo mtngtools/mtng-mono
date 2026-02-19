@@ -14,6 +14,7 @@ const sidePanelPosition = ref<SidePanelModeSelectable>('minimized');
 const sidePanelModeResolved = ref<string>('none');
 const availableStates = ref<SidePanelModeSelectable[]>([]);
 const overlayOnly = ref(false);
+const disableSidePanel = ref(false);
 const transitions = ref<string[]>([]);
 
 const transitionLog = computed(() => transitions.value.slice(0, 10));
@@ -75,6 +76,7 @@ function onAvailableStates(payload: {
     v-model:side-panel-position="sidePanelPosition"
     controls-overlay-only="0"
     :auto-hide-timeout="3000"
+    :disable-side-panel="disableSidePanel"
     @side-panel-transition="onTransition"
     @side-panel-available-states="onAvailableStates"
   >
@@ -136,6 +138,23 @@ function onAvailableStates(payload: {
           <div class="text-neutral-400">Available states</div>
           <div>{{ availableStates.join(', ') || '(none)' }}</div>
         </div>
+      </div>
+
+      <div
+        class="border-neutral-800 text-xs"
+        :style="{
+          marginTop: '1rem',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderRadius: '0.25rem',
+          padding: '0.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+        }"
+      >
+        <input id="disable-side-panel" v-model="disableSidePanel" type="checkbox">
+        <label for="disable-side-panel" class="text-neutral-400">Disable Side Panel</label>
       </div>
 
       <div
