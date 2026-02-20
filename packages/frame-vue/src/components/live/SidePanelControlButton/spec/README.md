@@ -20,6 +20,7 @@ Shared contracts are defined in `packages/frame-vue/src/components/live/spec/CON
 | `active` | `boolean` | `false` | Whether this control is active in selected-mode terms. |
 | `activeResolved` | `boolean` | `false` | Whether this control matches current resolved mode. |
 | `disabled` | `boolean` | `false` | Whether this control can currently be activated. |
+| `hideIcon` | `boolean` | `false` | Suppresses the default icon rendering. |
 
 ### Emits
 
@@ -36,13 +37,13 @@ Shared contracts are defined in `packages/frame-vue/src/components/live/spec/CON
 
 ## Default Label Mapping (V1)
 
-| State | Label |
-| :--- | :--- |
-| `auto` | `Auto` |
-| `right` | `Right` |
-| `bottom` | `Bottom` |
-| `full` | `Full` |
-| `minimized` | `Close` |
+| State | Label | Default Icon (if any) |
+| :--- | :--- | :--- |
+| `auto` | `Auto` | (None) |
+| `right` | `Right` | `IconPanelRight` |
+| `bottom` | `Bottom` | `IconPanelBottom` |
+| `full` | `Full` | `IconPanelFull` |
+| `minimized` | `Close` | `IconClose` |
 
 ## Behavior Rules (V1)
 

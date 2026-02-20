@@ -44,6 +44,7 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `headerHideWidthThreshold` | `string` | `'50rem'` | Viewport width below which the header is hidden. |
 | `headerHideHeightThreshold` | `string` | `'40rem'` | Viewport height below which the header is hidden. |
 | `disableSidePanel` | `boolean` | `false` | When `true`, the side panel system is disabled even if `sidePanelContent` slot is provided. |
+| `hideSidePanelIcons` | `boolean` | `false` | When `true`, suppresses default icon rendering on side panel control buttons. |
 | `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
 
 ### Emits

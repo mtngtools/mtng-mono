@@ -12,6 +12,7 @@ const props = withDefaults(
     availableStates?: SidePanelModeSelectable[]
     overlayOnly?: boolean
     showTitleLabel?: boolean
+    hideIcons?: boolean
     minWidth?: string
     maxWidth?: string
     minHeight?: string
@@ -23,6 +24,7 @@ const props = withDefaults(
     availableStates: () => [],
     overlayOnly: false,
     showTitleLabel: false,
+    hideIcons: false,
     minWidth: '320px',
     maxWidth: '30vw',
     minHeight: '200px',
@@ -148,6 +150,7 @@ const frameShellClass = computed(() => {
             :side-panel-mode-resolved="sidePanelModeResolved"
             :available-states="availableStates"
             :overlay-only="overlayOnly"
+            :hide-icons="hideIcons"
             @set-side-panel-mode="emit('setSidePanelMode', $event)"
             @close-side-panel="emit('closeSidePanel')"
           />

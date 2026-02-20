@@ -29,6 +29,7 @@ const props = withDefaults(
     headerHideWidthThreshold?: string
     headerHideHeightThreshold?: string
     disableSidePanel?: boolean
+    hideSidePanelIcons?: boolean
     enforceSlotSizingQuerySelector?: string
   }>(),
   {
@@ -49,6 +50,7 @@ const props = withDefaults(
     headerHideWidthThreshold: '50rem',
     headerHideHeightThreshold: '40rem',
     disableSidePanel: false,
+    hideSidePanelIcons: false,
   },
 )
 
@@ -833,6 +835,7 @@ onBeforeUnmount(() => {
           :side-panel-mode-resolved="sidePanelModeResolved"
           :available-states="userSelectableStates"
           :overlay-only="overlayOnly"
+          :hide-icons="hideSidePanelIcons"
           :min-width="sidePanelMinRight"
           :max-width="sidePanelFrameMaxWidth"
           :min-height="sidePanelFrameMinHeight"

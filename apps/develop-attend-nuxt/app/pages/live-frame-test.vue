@@ -15,6 +15,7 @@ const sidePanelModeResolved = ref<string>('none');
 const availableStates = ref<SidePanelModeSelectable[]>([]);
 const overlayOnly = ref(false);
 const disableSidePanel = ref(false);
+const hideSidePanelIcons = ref(false);
 const transitions = ref<string[]>([]);
 const enforceSlotSizingQuerySelector = ref<string>('');
 
@@ -75,9 +76,11 @@ function onAvailableStates(payload: {
 <template>
   <LiveFrame
     v-model:side-panel-position="sidePanelPosition"
+    class="bg-black"
     controls-overlay-only="0"
     :auto-hide-timeout="3000"
     :disable-side-panel="disableSidePanel"
+    :hide-side-panel-icons="hideSidePanelIcons"
     :enforce-slot-sizing-query-selector="enforceSlotSizingQuerySelector || undefined"
     @side-panel-transition="onTransition"
     @side-panel-available-states="onAvailableStates"
@@ -184,6 +187,11 @@ function onAvailableStates(payload: {
           <input id="disable-side-panel" v-model="disableSidePanel" type="checkbox">
           <label for="disable-side-panel" class="text-neutral-400">Disable Side Panel</label>
         </div>
+
+        <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+          <input id="hide-side-panel-icons" v-model="hideSidePanelIcons" type="checkbox">
+          <label for="hide-side-panel-icons" class="text-neutral-400">Hide Side Panel Icons</label>
+        </div>
         
         <div :style="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
           <label for="enforce-selector" class="text-neutral-400">Enforce Slot Sizing Selector</label>
@@ -216,7 +224,7 @@ function onAvailableStates(payload: {
 
     <template v-if="hasSidePanel" #sidePanelContent>
       <div
-        class="text-xs text-neutral-200"
+        class="text-xs text-neutral-200 bg-accent-950/30 border-t-2 border-accent-950/50 mt-2"
         :style="sidePanelContentStyle"
       >
         <div class="font-semibold">Side Panel Content</div>

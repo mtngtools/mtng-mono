@@ -1,6 +1,6 @@
 {
   "name": "@mtngtools/frame-vue",
-  "version": "0.0.18-experimental.0",
+  "version": "0.0.19-experimental.0",
   "description": "(Experimental) Vue.js component and composable library for mtngTOOLS",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,6 +18,10 @@
     "./composables": {
       "types": "./dist/composables.d.ts",
       "import": "./dist/composables.js"
+    },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "import": "./dist/icons.js"
     },
     "./style.css": "./dist/frame-vue.css"
   },

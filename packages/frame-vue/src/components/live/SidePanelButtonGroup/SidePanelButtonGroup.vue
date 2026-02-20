@@ -10,12 +10,14 @@ const props = withDefaults(
     sidePanelModeResolved?: SidePanelModeResolved
     availableStates?: SidePanelModeSelectable[]
     overlayOnly?: boolean
+    hideIcons?: boolean
   }>(),
   {
     sidePanelMode: 'none',
     sidePanelModeResolved: 'none',
     availableStates: () => [],
     overlayOnly: false,
+    hideIcons: false,
   },
 )
 
@@ -66,6 +68,7 @@ function closeSidePanel() {
         :state="state"
         :active="state === sidePanelMode"
         :active-resolved="state === sidePanelModeResolved"
+        :hide-icon="hideIcons"
         @click="setSidePanelMode"
       />
     </div>
