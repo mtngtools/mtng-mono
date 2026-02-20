@@ -224,7 +224,7 @@ function onAvailableStates(payload: {
 
     <template v-if="hasSidePanel" #sidePanelContent>
       <div
-        class="text-xs text-neutral-200 bg-accent-950/30 border-t-2 border-accent-950/50 mt-2"
+        class="text-xs text-neutral-200 bg-accent-200 border-t-2 border-accent-950/50"
         :style="sidePanelContentStyle"
       >
         <div class="font-semibold">Side Panel Content</div>

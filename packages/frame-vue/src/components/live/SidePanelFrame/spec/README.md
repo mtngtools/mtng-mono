@@ -60,6 +60,7 @@ Canonical shared types and contract rules are defined in `packages/frame-vue/src
 - Minimized header title button remains visible regardless of `showTitleLabel`.
 - Keep component focused on frame/chrome concerns only.
 - Layout strategy: use `display: grid` with `place-items` (or align/justify) to position the frame shell. Avoid `display: flex` for structural layout.
+- Header sizing must be organically driven by its content using `max-content` rows, allowing inner buttons and padding to naturally dictate the frame's height limits.
 
 ## Testing Requirements (V1)
 

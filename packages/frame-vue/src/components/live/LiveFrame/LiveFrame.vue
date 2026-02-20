@@ -266,7 +266,7 @@ const articleTrackStyle = computed<CSSProperties>(() => {
 
   if (sidePanelModeResolved.value === 'minimized') {
     return {
-      gridTemplateRows: '1fr 34px',
+      gridTemplateRows: '1fr max-content',
       gridTemplateColumns: '1fr',
     }
   }
