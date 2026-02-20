@@ -1,5 +1,6 @@
 import { mount, type VueWrapper } from '@vue/test-utils'
-import { afterAll, beforeAll, describe, expect, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, vi, it } from 'vitest'
+import { ref } from 'vue'
 
 import {
   describeLiveScenarioSequence,
@@ -155,6 +156,98 @@ describe('LiveFrame scenario runner pattern', () => {
           ],
         },
       ],
+    })
+
+    describeLiveScenarioSequence({
+      describeLabel: 'SidePanelFrame is not rendered when disableSidePanel is a true Ref',
+      mount: () => {
+        const disableRef = ref(true)
+        return mount(LiveFrame, {
+          props: {
+            sidePanelPosition: 'auto',
+            controlsOverlayOnly: '0',
+            disableSidePanel: disableRef,
+          },
+          slots: {
+            header: '<div data-test="header-slot" style="height: 48px">Header</div>',
+            default: '<div data-test="default-content">Default content</div>',
+            sidePanelContent: '<div data-test="side-panel-content">Side panel content</div>',
+          },
+          attachTo: document.body,
+        })
+      },
+      scenarios: [
+        {
+          describeLabel: 'initial load with sidePanelContent slot but Ref is true',
+          browserSize: { width: 1280, height: 900 },
+          waitMs: 75,
+          expects: [
+            {
+              describeLabel: 'SidePanelFrame shell should NOT exist',
+              run: ({ wrapper }) => {
+                const frame = wrapper.find('[data-test="side-panel-frame-shell"]')
+                expect(frame.exists()).toBe(false)
+              },
+            },
+          ],
+        },
+      ],
+    })
+
+    describeLiveScenarioSequence({
+      describeLabel: 'SidePanelFrame is not rendered when disableSidePanel is a truthy function',
+      mount: () => {
+        const disableFunc = () => true
+        return mount(LiveFrame, {
+          props: {
+            sidePanelPosition: 'auto',
+            controlsOverlayOnly: '0',
+            disableSidePanel: disableFunc,
+          },
+          slots: {
+            header: '<div data-test="header-slot" style="height: 48px">Header</div>',
+            default: '<div data-test="default-content">Default content</div>',
+            sidePanelContent: '<div data-test="side-panel-content">Side panel content</div>',
+          },
+          attachTo: document.body,
+        })
+      },
+      scenarios: [
+        {
+          describeLabel: 'initial load with sidePanelContent slot but function returns true',
+          browserSize: { width: 1280, height: 900 },
+          waitMs: 75,
+          expects: [
+            {
+              describeLabel: 'SidePanelFrame shell should NOT exist',
+              run: ({ wrapper }) => {
+                const frame = wrapper.find('[data-test="side-panel-frame-shell"]')
+                expect(frame.exists()).toBe(false)
+              },
+            },
+          ],
+        },
+      ],
+    })
+  })
+
+  describe('Exposed methods', () => {
+    it('exposes a refresh() method that synchronously recalcs sizing', () => {
+      const wrapper = mount(LiveFrame, {
+        slots: {
+          default: '<div id="child-1" style="height: 10px">Child 1</div>',
+        },
+        attachTo: document.body,
+      })
+
+      const vm = wrapper.vm as any
+      expect(typeof vm.refresh).toBe('function')
+
+      // Call the refresh to ensure it throws no errors 
+      // and triggers the enforceSlotChildSizing pathway
+      expect(() => {
+        vm.refresh()
+      }).not.toThrow()
     })
   })
 
