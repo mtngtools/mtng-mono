@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch, type CSSProperties } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, unref, useSlots, watch, type CSSProperties, type Ref } from 'vue'
 
 import SidePanelFrame from '../SidePanelFrame/SidePanelFrame.vue'
 import type {
@@ -28,7 +28,7 @@ const props = withDefaults(
     sidePanelMaxBottomTall?: string
     headerHideWidthThreshold?: string
     headerHideHeightThreshold?: string
-    disableSidePanel?: boolean
+    disableSidePanel?: boolean | (() => boolean) | Ref<boolean>
     hideSidePanelIcons?: boolean
     enforceSlotSizingQuerySelector?: string
   }>(),
@@ -115,7 +115,15 @@ const breakpointsPx: Record<string, number> = {
   '2xl': 1536,
 }
 
-const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent) && !props.disableSidePanel)
+const resolvedDisableSidePanel = computed(() => {
+  const val = unref(props.disableSidePanel)
+  if (typeof val === 'function') {
+    return val()
+  }
+  return Boolean(val)
+})
+
+const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent) && !resolvedDisableSidePanel.value)
 const hasHeaderSlot = computed(() => Boolean(slots.header))
 
 // User cannot select 'auto' from controls; it is still used internally and when expanding from minimized.
@@ -638,6 +646,18 @@ function updateViewportSize() {
   viewportHeight.value = window.innerHeight
   scheduleRecalculate('viewport-resize')
 }
+
+function refresh() {
+  viewportWidth.value = window.innerWidth
+  viewportHeight.value = window.innerHeight
+  headerHeight.value = headerRef.value?.offsetHeight ?? 0
+  defaultWidth.value = defaultRef.value?.offsetWidth ?? 0
+  defaultHeight.value = defaultRef.value?.offsetHeight ?? 0
+  enforceSlotChildSizing()
+  scheduleRecalculate('manual-refresh', true)
+}
+
+defineExpose({ refresh })
 
 watch(
   () => props.sidePanelPosition,

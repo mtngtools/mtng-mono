@@ -43,7 +43,7 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `sidePanelMaxBottomTall` | `string` | `'60vh'` | Height cap when `auto` resolves to `bottom` from tall aspect ratio. |
 | `headerHideWidthThreshold` | `string` | `'50rem'` | Viewport width below which the header is hidden. |
 | `headerHideHeightThreshold` | `string` | `'40rem'` | Viewport height below which the header is hidden. |
-| `disableSidePanel` | `boolean` | `false` | When `true`, the side panel system is disabled even if `sidePanelContent` slot is provided. |
+| `disableSidePanel` | `boolean \| (() => boolean) \| Ref<boolean>` | `false` | When truthy (evaluating functions and refs), the side panel system is disabled even if `sidePanelContent` slot is provided. |
 | `hideSidePanelIcons` | `boolean` | `false` | When `true`, suppresses default icon rendering on side panel control buttons. |
 | `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
 
@@ -55,6 +55,12 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `sidePanelTransition` | `{ from, to, reason }` | Emitted when side panel transitions begin. V1 requires event presence; detailed per-path `reason` mapping is not locked. |
 | `sidePanelAvailableStates` | `{ availableStates, sidePanelMode, sidePanelModeResolved, overlayOnly }` | Emits available-state contract changes for control rendering. `availableStates` does not include `'auto'` (user cannot select auto from controls). |
 | `defaultSlotResize` | `{ width, height }` | Emits default slot size changes when side panel slot is present. |
+
+### Exposed Methods
+
+| Method | Description |
+| :--- | :--- |
+| `refresh()` | Manually overrides ResizeObserver/resize listener triggers to synchronously read DOM measurements, enforce default slot height sizes, and push a `manual-refresh` layout recalculation tick to the debounce queue. |
 
 ### Side Panel Modes (V1)
 
