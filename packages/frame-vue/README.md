@@ -11,6 +11,7 @@ Vue.js component and composable library for mtngTOOLS. Built for use in Nuxt app
 | --- | --- |
 | [`LiveFrame`](./src/components/live/LiveFrame) | Full-screen wrapper for live video players with responsive layout support. |
 | [`LoggedInOut`](./src/components/LoggedInOut) | Component that toggles content visibility based on authentication status. |
+| [`VanillaIf`](./src/components/VanillaIf) | A `v-if` wrapper that naturally delays rendering until synchronously or asynchronously evaluating its condition. |
 | [`SidePanelFrame`](./src/components/live/SidePanelFrame) | Wrapper for controlling and displaying side panel content. |
 | [`SidePanelHeader`](./src/components/live/SidePanelHeader) | Standardized header component for the side panel. |
 | [`SidePanelButtonGroup`](./src/components/live/SidePanelButtonGroup) | Control group for managing panel selection buttons. |
@@ -33,7 +34,7 @@ pnpm add @mtngtools/frame-vue vue
 ### Regular Imports
 
 ```ts
-import { LiveFrame, LoggedInOut } from '@mtngtools/frame-vue';
+import { LiveFrame, LoggedInOut, VanillaIf } from '@mtngtools/frame-vue';
 ```
 
 ### Direct Subpath Imports
@@ -41,7 +42,7 @@ import { LiveFrame, LoggedInOut } from '@mtngtools/frame-vue';
 For specific needs or smaller bundle sizes, you can import directly from subpaths:
 
 ```ts
-import { LoggedInOut } from '@mtngtools/frame-vue/components';
+import { LoggedInOut, VanillaIf } from '@mtngtools/frame-vue/components';
 import { useSimpleLoggedIn } from '@mtngtools/frame-vue/composables';
 ```
 
