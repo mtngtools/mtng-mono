@@ -28,7 +28,8 @@ const props = withDefaults(
     sidePanelMaxBottomTall?: string
     headerHideWidthThreshold?: string
     headerHideHeightThreshold?: string
-    disableSidePanel?: boolean | (() => boolean) | Ref<boolean>
+    displaySidePanel?: boolean | (() => boolean) | Ref<boolean>
+    displaySidePanelWindowFn?: string
     hideSidePanelIcons?: boolean
     enforceSlotSizingQuerySelector?: string
   }>(),
@@ -49,7 +50,7 @@ const props = withDefaults(
     sidePanelMaxBottomTall: '60vh',
     headerHideWidthThreshold: '50rem',
     headerHideHeightThreshold: '40rem',
-    disableSidePanel: false,
+    displaySidePanel: true,
     hideSidePanelIcons: false,
   },
 )
@@ -115,15 +116,21 @@ const breakpointsPx: Record<string, number> = {
   '2xl': 1536,
 }
 
-const resolvedDisableSidePanel = computed(() => {
-  const val = unref(props.disableSidePanel)
+const resolvedDisplaySidePanel = computed(() => {
+  if (typeof window !== 'undefined') {
+    if (props.displaySidePanelWindowFn && typeof (window as any)[props.displaySidePanelWindowFn] === 'function') {
+      return Boolean((window as any)[props.displaySidePanelWindowFn]())
+    }
+  }
+
+  const val = unref(props.displaySidePanel)
   if (typeof val === 'function') {
     return val()
   }
   return Boolean(val)
 })
 
-const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent) && !resolvedDisableSidePanel.value)
+const hasSidePanelSlot = computed(() => Boolean(slots.sidePanelContent) && resolvedDisplaySidePanel.value)
 const hasHeaderSlot = computed(() => Boolean(slots.header))
 
 // User cannot select 'auto' from controls; it is still used internally and when expanding from minimized.

@@ -43,7 +43,8 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `sidePanelMaxBottomTall` | `string` | `'60vh'` | Height cap when `auto` resolves to `bottom` from tall aspect ratio. |
 | `headerHideWidthThreshold` | `string` | `'50rem'` | Viewport width below which the header is hidden. |
 | `headerHideHeightThreshold` | `string` | `'40rem'` | Viewport height below which the header is hidden. |
-| `disableSidePanel` | `boolean \| (() => boolean) \| Ref<boolean>` | `false` | When truthy (evaluating functions and refs), the side panel system is disabled even if `sidePanelContent` slot is provided. |
+| `displaySidePanel` | `boolean \| (() => boolean) \| Ref<boolean>` | `true` | When falsy (evaluating functions and refs), the side panel system is disabled even if `sidePanelContent` slot is provided. |
+| `displaySidePanelWindowFn` | `string` | `undefined` | Optional window function name. If it exists on `window` and evaluates to truthy, the side panel system is displayed. Overrides `displaySidePanel`. |
 | `hideSidePanelIcons` | `boolean` | `false` | When `true`, suppresses default icon rendering on side panel control buttons. |
 | `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
 
