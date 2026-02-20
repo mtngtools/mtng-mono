@@ -52,7 +52,7 @@ const showDefaultButtonGroup = computed(() => !isMinimized.value)
       justifyContent: 'space-between',
       gap: '0.5rem',
       overflow: 'hidden',
-      padding: '0.25rem 0.5rem',
+      padding: '0.5rem 0.5rem',
     }"
   >
     <div
@@ -82,10 +82,10 @@ const showDefaultButtonGroup = computed(() => !isMinimized.value)
             borderRadius: '0.375rem 0.375rem 0 0',
             borderWidth: '1px',
             borderStyle: 'solid',
-            paddingLeft: '0.5rem',
-            paddingRight: '0.5rem',
-            paddingTop: '0.25rem',
-            paddingBottom: '0.25rem',
+            paddingLeft: '0.375rem',
+            paddingRight: '0.375rem',
+            paddingTop: '0.125rem',
+            paddingBottom: '0.125rem',
             fontSize: '0.70rem',
             lineHeight: '1.2rem',
             textTransform: 'uppercase',

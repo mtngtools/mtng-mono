@@ -118,7 +118,7 @@ const framePositionStyle = computed<CSSProperties | undefined>(() => {
 const frameGridStyle = computed<CSSProperties>(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr',
-  gridTemplateRows: isMinimized.value ? '1.8rem' : '1.8rem minmax(0, 1fr)',
+  gridTemplateRows: isMinimized.value ? 'max-content' : 'max-content minmax(0, 1fr)',
 }))
 
 const frameShellClass = computed(() => {
