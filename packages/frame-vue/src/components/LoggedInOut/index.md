@@ -57,7 +57,30 @@ const forceLogout = () => {
 
 ### Vanilla JavaScript Integration
 
-The component exposes its methods, making it easy to interact with from external scripts.
+You can initialize the shared state natively from outside Vue before the `LoggedInOut` component even mounts. This is especially useful in environments like Astro where you might have backend session data to pass down.
+
+```html
+<!-- Set this anywhere before your Vue app mounts -->
+<script>
+  window.initialLoggedIn = true; // Setup the seed variable
+</script>
+
+<div id="app">
+  <!-- The Vue application root -->
+</div>
+```
+
+Then configure the Vue component to look for that global object:
+
+```vue
+<template>
+  <LoggedInOut initialize-from-window-access-object>
+    <!-- Your content -->
+  </LoggedInOut>
+</template>
+```
+
+The component exposes its methods, making it easy to interact with from external scripts after it mounts.
 
 ```javascript
 // Assuming 'componentInstance' is the mounted LoggedInOut component

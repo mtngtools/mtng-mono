@@ -1,59 +1,69 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted, watch, computed } from 'vue'
 import { useSimpleLoggedIn } from '../../composables/useSimpleLoggedIn'
 
 const props = withDefaults(defineProps<{
   initiallyLoggedIn?: boolean
   addWindowAccess?: boolean
   windowAccessObjectName?: string
+  initializeFromWindowAccessObject?: boolean
+  initializeWindowAccessObjectName?: string
+  waitBehavior?: boolean
 }>(), {
   addWindowAccess: false,
-  windowAccessObjectName: 'loggedInOut'
+  windowAccessObjectName: 'loggedInOut',
+  initializeFromWindowAccessObject: false,
+  initializeWindowAccessObjectName: 'initialLoggedIn',
+  waitBehavior: undefined,
 })
 
-const { loggedIn, setToLoggedIn, setToLoggedOut, toggleLoggedIn } = useSimpleLoggedIn(props.initiallyLoggedIn)
+const { 
+  loggedIn, 
+  isInitialized,
+  setToLoggedIn, 
+  setToLoggedOut, 
+  toggleLoggedIn,
+  getLoggedIn,
+  setLoggedIn,
+  setupWindowAccess,
+  cleanupWindowAccess
+} = useSimpleLoggedIn({
+  initialValue: props.initiallyLoggedIn,
+  addWindowAccess: props.addWindowAccess,
+  windowAccessObjectName: props.windowAccessObjectName,
+  initializeFromWindowAccessObject: props.initializeFromWindowAccessObject,
+  initializeWindowAccessObjectName: props.initializeWindowAccessObjectName
+})
 
-const getLoggedIn = () => loggedIn.value
-const setLoggedIn = (val: boolean) => { loggedIn.value = val }
-
-const setupWindowAccess = () => {
-  if (props.addWindowAccess && typeof window !== 'undefined') {
-    (window as any)[props.windowAccessObjectName] = {
-      setToLoggedIn,
-      setToLoggedOut,
-      toggleLoggedIn,
-      getLoggedIn,
-      setLoggedIn,
-    }
+const resolvedWaitBehavior = computed(() => {
+  if (props.waitBehavior !== undefined) {
+    return props.waitBehavior
   }
-}
-
-const cleanupWindowAccess = (name = props.windowAccessObjectName) => {
-  if (typeof window !== 'undefined' && (window as any)[name]) {
-    delete (window as any)[name]
-  }
-}
+  return props.initializeFromWindowAccessObject
+})
 
 onMounted(() => {
-  setupWindowAccess()
+  if (props.addWindowAccess) {
+    setupWindowAccess(props.windowAccessObjectName)
+  }
 })
 
 onUnmounted(() => {
-  cleanupWindowAccess()
+  cleanupWindowAccess(props.windowAccessObjectName)
 })
 
 watch(() => props.addWindowAccess, (newVal) => {
   if (newVal) {
-    setupWindowAccess()
+    setupWindowAccess(props.windowAccessObjectName)
   } else {
-    cleanupWindowAccess()
+    cleanupWindowAccess(props.windowAccessObjectName)
   }
 })
 
 watch(() => props.windowAccessObjectName, (_newVal, oldVal) => {
   if (props.addWindowAccess) {
-    cleanupWindowAccess(oldVal)
-    setupWindowAccess()
+    if (oldVal) cleanupWindowAccess(oldVal)
+    setupWindowAccess(props.windowAccessObjectName)
   }
 })
 
@@ -69,10 +79,12 @@ defineExpose({
 </script>
 
 <template>
-  <template v-if="loggedIn">
-    <slot name="loggedIn" />
-  </template>
-  <template v-else>
-    <slot name="loggedOut" />
+  <template v-if="!resolvedWaitBehavior || isInitialized">
+    <template v-if="loggedIn">
+      <slot name="loggedIn" />
+    </template>
+    <template v-else>
+      <slot name="loggedOut" />
+    </template>
   </template>
 </template>
