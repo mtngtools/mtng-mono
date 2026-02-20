@@ -86,4 +86,35 @@ describe('VanillaIf Polling Engine', () => {
         expect(wrapper.find('#else').exists()).toBe(true)
         vi.useRealTimers()
     })
+
+    it('polls window method when showWindowFn is specified', async () => {
+        vi.useFakeTimers()
+        // initially not present on window
+
+        const wrapper = mount(VanillaIf, {
+            props: {
+                showWindowFn: 'myExternalVanillaLogic'
+            },
+            slots: { default: '<div id="target">Loaded</div>' }
+        })
+
+        expect(wrapper.find('#target').exists()).toBe(false)
+
+        // Advance
+        vi.advanceTimersByTime(150)
+        expect(wrapper.find('#target').exists()).toBe(false)
+
+            // Mock external system injection
+            ; (window as any).myExternalVanillaLogic = () => true
+
+        // Catch the polling tick
+        vi.advanceTimersByTime(50)
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.find('#target').exists()).toBe(true)
+        vi.useRealTimers()
+
+        // Cleanup global
+        delete (window as any).myExternalVanillaLogic
+    })
 })
