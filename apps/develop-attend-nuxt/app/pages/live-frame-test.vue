@@ -16,6 +16,7 @@ const availableStates = ref<SidePanelModeSelectable[]>([]);
 const overlayOnly = ref(false);
 const disableSidePanel = ref(false);
 const transitions = ref<string[]>([]);
+const enforceSlotSizingQuerySelector = ref<string>('');
 
 const transitionLog = computed(() => transitions.value.slice(0, 10));
 
@@ -77,6 +78,7 @@ function onAvailableStates(payload: {
     controls-overlay-only="0"
     :auto-hide-timeout="3000"
     :disable-side-panel="disableSidePanel"
+    :enforce-slot-sizing-query-selector="enforceSlotSizingQuerySelector || undefined"
     @side-panel-transition="onTransition"
     @side-panel-available-states="onAvailableStates"
   >
@@ -111,6 +113,31 @@ function onAvailableStates(payload: {
       <p class="text-sm text-neutral-300" :style="{ marginTop: '0.5rem' }">
         Resize the viewport and use side panel controls to observe selected/resolved mode behavior.
       </p>
+
+      <div
+        id="nested-wrapper"
+        :style="{
+          marginTop: '1.5rem',
+          border: '1px dashed #444',
+          padding: '1rem',
+          borderRadius: '0.25rem'
+        }"
+      >
+        <div class="text-xs text-neutral-500 mb-2">Nested Content (Targetable by Selector)</div>
+        <div
+          class="nested-target"
+          :style="{
+            backgroundColor: '#111',
+            border: '1px solid #555',
+            padding: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }"
+        >
+          <span class="text-xs">I am ".nested-target"</span>
+        </div>
+      </div>
 
       <div
         class="text-xs"
@@ -149,12 +176,25 @@ function onAvailableStates(payload: {
           borderRadius: '0.25rem',
           padding: '0.75rem',
           display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
+          flexDirection: 'column',
+          gap: '0.75rem',
         }"
       >
-        <input id="disable-side-panel" v-model="disableSidePanel" type="checkbox">
-        <label for="disable-side-panel" class="text-neutral-400">Disable Side Panel</label>
+        <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+          <input id="disable-side-panel" v-model="disableSidePanel" type="checkbox">
+          <label for="disable-side-panel" class="text-neutral-400">Disable Side Panel</label>
+        </div>
+        
+        <div :style="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
+          <label for="enforce-selector" class="text-neutral-400">Enforce Slot Sizing Selector</label>
+          <input 
+            id="enforce-selector" 
+            v-model="enforceSlotSizingQuerySelector" 
+            placeholder="e.g. .nested-target"
+            class="bg-neutral-900 border border-neutral-700 px-2 py-1 rounded text-neutral-100 outline-none focus:border-accent"
+          >
+          <span class="text-[10px] text-neutral-500">Targets elements for explicit height matching. Empty targets direct children.</span>
+        </div>
       </div>
 
       <div

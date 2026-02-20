@@ -12,8 +12,14 @@ import {
 } from '../spec/test-utils/liveScenarioRunner'
 
 export class ResizeObserverMock {
+  static callback: ((entries: any[]) => void) | null = null
+  constructor(cb: (entries: any[]) => void) {
+    ResizeObserverMock.callback = cb
+  }
   observe() { }
-  disconnect() { }
+  disconnect() {
+    ResizeObserverMock.callback = null
+  }
   unobserve() { }
 }
 

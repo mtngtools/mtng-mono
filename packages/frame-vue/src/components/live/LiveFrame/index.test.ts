@@ -157,4 +157,98 @@ describe('LiveFrame scenario runner pattern', () => {
       ],
     })
   })
+
+  describe('Content fit control', () => {
+    describe('Default behavior (direct children)', () => {
+      describeLiveScenarioSequence({
+        describeLabel: 'height is enforced on direct children',
+        mount: () => {
+          return mount(LiveFrame, {
+            props: {
+              sidePanelPosition: 'right',
+            },
+            slots: {
+              default: `
+                <div id="child-1" style="height: 10px">Child 1</div>
+                <div id="child-2" style="height: 10px">Child 2</div>
+              `,
+            },
+            attachTo: document.body,
+          })
+        },
+        scenarios: [
+          {
+            describeLabel: 'initial mount sets height on direct children',
+            browserSize: { width: 1280, height: 900 },
+            waitMs: 100, // wait for ResizeObserver and nextTick
+            expects: [
+              {
+                describeLabel: 'direct children should have measured height applied',
+                run: ({ wrapper }) => {
+                  if (ResizeObserverMock.callback) {
+                    ResizeObserverMock.callback([])
+                  }
+
+                  const child1 = wrapper.find('#child-1').element as HTMLElement
+                  const child2 = wrapper.find('#child-2').element as HTMLElement
+
+                  // Height should be applied. 
+                  // In happy-dom, offsetHeight is 0 by default, so h will be "0px".
+                  // But we can check if it was set explicitly.
+                  expect(child1.style.height).toBe('0px')
+                  expect(child2.style.height).toBe('0px')
+                },
+              },
+            ],
+          },
+        ],
+      })
+    })
+
+    describe('Custom selector behavior', () => {
+      describeLiveScenarioSequence({
+        describeLabel: 'height is enforced on selected elements',
+        mount: () => {
+          return mount(LiveFrame, {
+            props: {
+              sidePanelPosition: 'right',
+              enforceSlotSizingQuerySelector: '.target-me',
+            },
+            slots: {
+              default: `
+                <div id="direct-child">
+                  <div class="target-me" id="nested-target" style="height: 10px">Target</div>
+                  <div id="not-target" style="height: 10px">Not Target</div>
+                </div>
+              `,
+            },
+            attachTo: document.body,
+          })
+        },
+        scenarios: [
+          {
+            describeLabel: 'initial mount sets height on selected elements',
+            browserSize: { width: 1280, height: 900 },
+            waitMs: 100,
+            expects: [
+              {
+                describeLabel: 'selected element should have height applied, other not',
+                run: ({ wrapper }) => {
+                  if (ResizeObserverMock.callback) {
+                    ResizeObserverMock.callback([])
+                  }
+
+                  const target = wrapper.find('#nested-target').element as HTMLElement
+                  const notTarget = wrapper.find('#not-target').element as HTMLElement
+
+                  expect(target.style.height).toBe('0px')
+                  expect(notTarget.style.height).toBe('10px') // unchanged
+                },
+              },
+            ],
+          },
+        ],
+      })
+    })
+  })
 })

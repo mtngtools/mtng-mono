@@ -44,6 +44,7 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `headerHideWidthThreshold` | `string` | `'50rem'` | Viewport width below which the header is hidden. |
 | `headerHideHeightThreshold` | `string` | `'40rem'` | Viewport height below which the header is hidden. |
 | `disableSidePanel` | `boolean` | `false` | When `true`, the side panel system is disabled even if `sidePanelContent` slot is provided. |
+| `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
 
 ### Emits
 
@@ -140,7 +141,7 @@ Required semantic/container structure:
 5. Inside `article`:
    - `main` wraps only default slot content.
    - Side panel frame/slot is a sibling of `main` (never nested inside `main`).
-- Default slot content is rendered through an internal non-scroll fit wrapper. To ensure compatibility with web components and complex children, `LiveFrame` explicitly enforces the container height onto the direct slot children via JavaScript (`ResizeObserver`). Width remains managed by CSS (`100%`).
+- Default slot content is rendered through an internal non-scroll fit wrapper. To ensure compatibility with web components and complex children, `LiveFrame` explicitly enforces the container height onto targeting elements via JavaScript (`ResizeObserver`). By default, it targets direct slot children; if `enforceSlotSizingQuerySelector` is provided, it uses `querySelectorAll` to select matching elements within the `default` slot container. Width remains managed by CSS (`100%`).
 - Overflow is clipped by the frame regions.
 - `section` must not use flex layout in V1.
 - `article` wrapper around `main` + side panel must not use flex layout in V1.
@@ -163,7 +164,7 @@ Required semantic/container structure:
 - Default slot content must never change top-level frame geometry, row/column track sizing, or side panel placement.
 - Intrinsic size growth from default slot content must not reflow frame layout; overflow behavior is clipped/contained by frame regions.
 - Once mode is resolved for a given viewport state, adding/removing/changing default slot content must not change layout mode or panel placement.
-- Default slot content must render against the full allocated `main` bounds by default (not centered by frame chrome). To guarantee this for all content types, `LiveFrame` monitors the `main` container size and explicitly sets the `height` of the top-level slot children to match.
+- Default slot content must render against the full allocated `main` bounds by default (not centered by frame chrome). To guarantee this for all content types, `LiveFrame` monitors the `main` container size and explicitly sets the `height` of the targeted elements (direct children or selected by `enforceSlotSizingQuerySelector`) to match.
 - In non-overlay mode, default slot content must never remain visible under side panel frame chrome. The bottom of the default content frame must never extend below (or behind) the side panel frame; that is allowed only when `overlayOnly === true` or in full/minimized as above. When not overlapping, main and panel must touch: in bottom mode, main bottom = side panel top; in right mode, main right = side panel left.
 
 #### Top-level layout scenarios (V1)

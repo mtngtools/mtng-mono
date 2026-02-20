@@ -29,6 +29,7 @@ const props = withDefaults(
     headerHideWidthThreshold?: string
     headerHideHeightThreshold?: string
     disableSidePanel?: boolean
+    enforceSlotSizingQuerySelector?: string
   }>(),
   {
     sidePanelPosition: 'minimized',
@@ -80,13 +81,18 @@ function enforceSlotChildSizing() {
   const container = defaultRef.value
   if (!container) return
 
-  const children = Array.from(container.children) as HTMLElement[]
+  const children = props.enforceSlotSizingQuerySelector
+    ? (Array.from(container.querySelectorAll(props.enforceSlotSizingQuerySelector)) as HTMLElement[])
+    : (Array.from(container.children) as HTMLElement[])
+
   const h = `${defaultHeight.value}px`
+  // console.debug('enforceSlotChildSizing', props.enforceSlotSizingQuerySelector, h);
 
   children.forEach((child) => {
     // Only apply if different to avoid unnecessary reflows/jitter
     if (child.style.height !== h) {
       child.style.height = h
+      // console.debug('enforceSlotChildSizing', child, h);
     }
   })
 }
