@@ -14,6 +14,9 @@ A key goal of this component is to provide easy access to authentication state a
 - `initiallyLoggedIn`: `boolean` (optional) - If provided, initializes the shared `loggedIn` state to this value.
 - `addWindowAccess`: `boolean` (optional, default: `false`) - If `true`, adds an object to the global `window` object for external access.
 - `windowAccessObjectName`: `string` (optional, default: `'loggedInOut'`) - The name of the object on the `window`.
+- `initializeFromWindowAccessObject`: `boolean` (optional, default: `false`) - If `true`, checks `window[initializeWindowAccessObjectName]` during the initialization of the underlying composable and seeds `loggedIn` from its value.
+- `initializeWindowAccessObjectName`: `string` (optional, default: `'initialLoggedIn'`) - The name of the `window` variable to check for the initial value if `initializeFromWindowAccessObject` is true.
+- `waitBehavior`: `boolean` (optional)- If `true`, defers rendering any slots until the underlying `useSimpleLoggedIn` state has been explicitly initialized (either via direct configuration, or by a successful `window` object read during SSR/CSR). If omitted, defaults to `true` when `initializeFromWindowAccessObject` is `true`.
 
 ### Slots
 

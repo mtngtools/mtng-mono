@@ -13,6 +13,9 @@
     <NuxtLink class="mt-6 inline-block rounded-md border border-neutral-700 px-4 py-2 hover:border-neutral-500 ml-4" to="/control-button-test">
       SidePanelControlButton test page
     </NuxtLink>
+    <NuxtLink class="mt-6 inline-block rounded-md border border-neutral-700 px-4 py-2 hover:border-neutral-500 ml-4" to="/logged-in-wait-test">
+      LoggedInOut waitBehavior test page
+    </NuxtLink>
 
     <section class="mt-12">
       <h2 class="text-xl font-semibold mb-4">Exported Icons</h2>

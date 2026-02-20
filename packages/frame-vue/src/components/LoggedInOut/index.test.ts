@@ -1,12 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import LoggedInOut from './LoggedInOut.vue'
-import { useSimpleLoggedIn } from '../../composables/useSimpleLoggedIn'
+import { useSimpleLoggedIn, __resetStateForTesting } from '../../composables/useSimpleLoggedIn/useSimpleLoggedIn'
 
 describe('LoggedInOut.vue', () => {
     beforeEach(() => {
-        const { setToLoggedOut } = useSimpleLoggedIn()
-        setToLoggedOut()
+        __resetStateForTesting()
     })
 
     it('should render loggedOut slot initially', () => {
@@ -82,6 +81,36 @@ describe('LoggedInOut.vue', () => {
         // Wait for next tick to ensure DOM updates (though useSimpleLoggedIn is reactive independently)
         await wrapper.vm.$nextTick()
         expect(wrapper.find('#logged-in').exists()).toBe(true)
+    })
+
+    it('should wait to render slots if waitBehavior is true and state is uninitialized', async () => {
+        const wrapper = mount(LoggedInOut, {
+            props: {
+                waitBehavior: true,
+                initializeFromWindowAccessObject: true,
+                initializeWindowAccessObjectName: 'delayedWindowAuth'
+            },
+            slots: {
+                loggedIn: '<div id="logged-in">In</div>',
+                loggedOut: '<div id="logged-out">Out</div>'
+            }
+        })
+
+        // Should render neither because initialization hasn't occurred
+        expect(wrapper.find('#logged-in').exists()).toBe(false)
+        expect(wrapper.find('#logged-out').exists()).toBe(false)
+
+        setTimeout(() => {
+            ; (window as any).delayedWindowAuth = true
+        }, 100)
+
+        await new Promise(resolve => setTimeout(resolve, 200))
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.find('#logged-in').exists()).toBe(true)
+        expect(wrapper.find('#logged-out').exists()).toBe(false)
+
+        delete (window as any).delayedWindowAuth
     })
 
     it('should add window access when addWindowAccess is true', () => {
