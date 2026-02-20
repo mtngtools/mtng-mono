@@ -20,6 +20,7 @@ Shared contracts are defined in `packages/frame-vue/src/components/live/spec/CON
 | `sidePanelModeResolved` | `'right' \| 'bottom' \| 'full' \| 'minimized' \| 'none'` | `'none'` | Resolved mode (source for resolved-state cues). |
 | `availableStates` | `Array<'right' \| 'bottom' \| 'full' \| 'minimized'>` | `[]` | User-selectable modes in this viewport/context. Does not include `'auto'`; no Auto button is ever shown. |
 | `overlayOnly` | `boolean` | `false` | Overlay-only behavior hint used by default control rendering. |
+| `hideIcons` | `boolean` | `false` | Passes down instruction to suppress control icons. |
 
 ### Emits
 

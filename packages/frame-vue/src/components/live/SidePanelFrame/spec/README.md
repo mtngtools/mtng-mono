@@ -22,6 +22,7 @@ Canonical shared types and contract rules are defined in `packages/frame-vue/src
 | `availableStates` | `Array<'right' \| 'bottom' \| 'full' \| 'minimized'>` | `[]` | User-selectable states in current context (excludes `'auto'`). |
 | `overlayOnly` | `boolean` | `false` | Whether controls should use overlay-only behavior. |
 | `showTitleLabel` | `boolean` | `false` | Whether `SidePanelHeader` should render its non-minimized fallback title text label. Defaults `false` because side panel content typically carries its own heading. Minimized title button remains visible. |
+| `hideIcons` | `boolean` | `false` | Passes down instruction to suppress control icons. |
 | `minWidth` | `string` | `'320px'` | Minimum width when resolved mode is `right`. |
 | `maxWidth` | `string` | `'30vw'` | Maximum width when resolved mode is `right`. |
 | `minHeight` | `string` | `'200px'` | Minimum height when resolved mode is `bottom`. |

@@ -20,6 +20,7 @@ export default defineConfig({
         index: resolve(__dirname, 'src/index.ts'),
         components: resolve(__dirname, 'src/components/index.ts'),
         composables: resolve(__dirname, 'src/composables/index.ts'),
+        icons: resolve(__dirname, 'src/components/icons/index.ts'),
       },
       formats: ['es'],
     },

@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Component } from 'vue'
 
 import type { SidePanelModeSelectable } from '../types'
+import {
+  IconPanelRight,
+  IconPanelBottom,
+  IconPanelFull,
+  IconClose,
+} from '../../icons'
 
 const props = withDefaults(
   defineProps<{
@@ -9,11 +16,13 @@ const props = withDefaults(
     active?: boolean
     activeResolved?: boolean
     disabled?: boolean
+    hideIcon?: boolean
   }>(),
   {
     active: false,
     activeResolved: false,
     disabled: false,
+    hideIcon: false,
   },
 )
 
@@ -27,6 +36,14 @@ const defaultLabelMap: Record<SidePanelModeSelectable, string> = {
   bottom: 'Bottom',
   full: 'Full',
   minimized: 'Close',
+}
+
+const defaultIconMap: Record<SidePanelModeSelectable, Component | null> = {
+  auto: null,
+  right: IconPanelRight,
+  bottom: IconPanelBottom,
+  full: IconPanelFull,
+  minimized: IconClose,
 }
 
 const label = computed(() => defaultLabelMap[props.state])
@@ -77,7 +94,13 @@ function handleClick() {
     }"
     @click="handleClick"
   >
-    <slot name="icon" :state="state" />
+    <slot name="icon" :state="state">
+      <component 
+        v-if="!hideIcon && defaultIconMap[state]" 
+        :is="defaultIconMap[state]" 
+        style="width: .85em; height: .85em;"
+      />
+    </slot>
     <slot name="label" :state="state">{{ label }}</slot>
   </button>
 </template>
