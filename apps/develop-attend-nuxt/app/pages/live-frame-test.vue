@@ -14,7 +14,6 @@ const sidePanelPosition = ref<SidePanelModeSelectable>('minimized');
 const sidePanelModeResolved = ref<string>('none');
 const availableStates = ref<SidePanelModeSelectable[]>([]);
 const overlayOnly = ref(false);
-const disableSidePanel = ref(false);
 const hideSidePanelIcons = ref(false);
 const transitions = ref<string[]>([]);
 const enforceSlotSizingQuerySelector = ref<string>('');
@@ -79,7 +78,7 @@ function onAvailableStates(payload: {
     class="bg-black"
     controls-overlay-only="0"
     :auto-hide-timeout="3000"
-    :disable-side-panel="disableSidePanel"
+    display-side-panel-window-fn="checkExternalDisplayState"
     :hide-side-panel-icons="hideSidePanelIcons"
     :enforce-slot-sizing-query-selector="enforceSlotSizingQuerySelector || undefined"
     @side-panel-transition="onTransition"
@@ -116,6 +115,14 @@ function onAvailableStates(payload: {
       <p class="text-sm text-neutral-300" :style="{ marginTop: '0.5rem' }">
         Resize the viewport and use side panel controls to observe selected/resolved mode behavior.
       </p>
+
+      <component :is="'script'">
+        console.log('LiveFrame: Waiting 2 seconds before authorizing Side Panel...');
+        setTimeout(() => {
+          console.log('LiveFrame: window.checkExternalDisplayState = () => true');
+          window.checkExternalDisplayState = () => true;
+        }, 2000);
+      </component>
 
       <div
         id="nested-wrapper"
@@ -183,11 +190,6 @@ function onAvailableStates(payload: {
           gap: '0.75rem',
         }"
       >
-        <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
-          <input id="disable-side-panel" v-model="disableSidePanel" type="checkbox">
-          <label for="disable-side-panel" class="text-neutral-400">Disable Side Panel</label>
-        </div>
-
         <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
           <input id="hide-side-panel-icons" v-model="hideSidePanelIcons" type="checkbox">
           <label for="hide-side-panel-icons" class="text-neutral-400">Hide Side Panel Icons</label>
