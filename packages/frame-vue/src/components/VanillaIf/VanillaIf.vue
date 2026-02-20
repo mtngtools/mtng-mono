@@ -2,7 +2,8 @@
 import { ref, unref, onMounted, onUnmounted, type Ref, watch } from 'vue'
 
 const props = defineProps<{
-  show: boolean | (() => boolean) | Ref<boolean>
+  show?: boolean | (() => boolean) | Ref<boolean>
+  showWindowFn?: string
 }>()
 
 const isReady = ref(false)
@@ -18,11 +19,17 @@ function clearPolling() {
 }
 
 function evaluateShow(): { ready: boolean; value: boolean } {
-  const unwrapped = unref(props.show)
+  let toEvaluate: any
+
+  if (typeof window !== 'undefined' && props.showWindowFn) {
+     toEvaluate = (window as any)[props.showWindowFn]
+  } else {
+     toEvaluate = unref(props.show)
+  }
   
-  if (typeof unwrapped === 'function') {
+  if (typeof toEvaluate === 'function') {
     try {
-      const result = unwrapped()
+      const result = toEvaluate()
       if (typeof result === 'boolean') {
         return { ready: true, value: result }
       }
@@ -37,20 +44,25 @@ function evaluateShow(): { ready: boolean; value: boolean } {
     }
   }
 
+  // If we're waiting for a showWindowFn but it's not a function yet, it's not ready
+  if (props.showWindowFn) {
+    return { ready: false, value: false }
+  }
+
   // Boolean or Ref<boolean> unwrapped naturally
-  if (typeof unwrapped === 'boolean') {
-    return { ready: true, value: unwrapped }
+  if (typeof toEvaluate === 'boolean') {
+    return { ready: true, value: toEvaluate }
   }
 
   // If we passed an object variable string that hasn't populated yet,
   // we can also support polling until that variable exists if requested,
   // but standard v-if resolves undefined to false. Let's lock it to boolean
   // explicitly as stated in the spec.
-  if (unwrapped === undefined || unwrapped === null) {
+  if (toEvaluate === undefined || toEvaluate === null) {
       return { ready: false, value: false }
   }
 
-  return { ready: true, value: Boolean(unwrapped) }
+  return { ready: true, value: Boolean(toEvaluate) }
 }
 
 function processEvaluation() {
@@ -81,7 +93,7 @@ if (initialCheck.ready) {
   isVisible.value = initialCheck.value
 }
 
-watch(() => props.show, () => {
+watch(() => [props.show, props.showWindowFn], () => {
   // If the prop identity changes, reset and re-evaluate
   isReady.value = false
   clearPolling()

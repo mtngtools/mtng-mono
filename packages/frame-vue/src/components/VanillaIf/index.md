@@ -35,5 +35,7 @@ If `window.externalAuthSystem` causes a `ReferenceError` or `TypeError` upon mou
 
 ## API Settings
 
-- **`show`**: `boolean | (() => boolean) | Ref<boolean>` 
-  The condition tracking the display. Only when it resolves strictly to a literal `boolean` does it freeze and render the `default` or `else` views.
+- **`show`**: `boolean | (() => boolean) | Ref<boolean>` (Optional)
+  The direct evaluation condition tracking the display. Only when it resolves strictly to a literal `boolean` does it freeze and render the `default` or `else` views.
+- **`showWindowFn`**: `string` (Optional)
+  An optional string representing a function mapping on the `window` Object (e.g. `"checkAuthStatus"` for `window.checkAuthStatus()`). If provided, `VanillaIf` will securely poll this Window reference instead of the `show` property.

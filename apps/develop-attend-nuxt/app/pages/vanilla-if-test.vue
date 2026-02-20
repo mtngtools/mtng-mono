@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { VanillaIf } from '@mtngtools/frame-vue'
-
-const isExternalLoaded = () => (window as any).myDelayedVanillaFunc()
 </script>
 
 <template>
@@ -28,7 +26,7 @@ const isExternalLoaded = () => (window as any).myDelayedVanillaFunc()
     </p>
 
     <div class="p-6 border border-neutral-800 rounded-lg bg-neutral-900 mt-8">
-      <VanillaIf :show="isExternalLoaded">
+      <VanillaIf show-window-fn="myDelayedVanillaFunc">
         <div class="flex items-center space-x-3 text-green-400 font-medium">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span>Success! The VanillaIf wrapper has resolved <code>window.myDelayedVanillaFunc</code> and mounted this content.</span>

@@ -12,7 +12,8 @@ When integrating Vue components into environments with plain Vanilla JavaScript 
 
 | Name | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `show` | `boolean \| (() => boolean) \| Ref<boolean>` | **required** | The condition to evaluate to determine slot visibility. |
+| `show` | `boolean \| (() => boolean) \| Ref<boolean>` | `undefined` | The condition to evaluate to determine slot visibility. |
+| `showWindowFn` | `string` | `undefined` | Optional window function name. If provided, evaluates `window[showWindowFn]()` instead of `show`. |
 
 ### Slots
 
