@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../../../packages/frame-vue/src";
+@source "../../../../../packages/frame-vue/src";
 
 @theme {
   /* You can also define shades */
