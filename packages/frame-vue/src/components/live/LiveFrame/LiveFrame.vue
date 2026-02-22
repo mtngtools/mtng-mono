@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, unref, useSlots, watch, type CSSProperties, type Ref } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
 
 import SidePanelFrame from '../SidePanelFrame/SidePanelFrame.vue'
 import type {
@@ -32,6 +33,8 @@ const props = withDefaults(
     displaySidePanelWindowFn?: string
     hideSidePanelIcons?: boolean
     enforceSlotSizingQuerySelector?: string
+    autoRefresh?: boolean
+    autoRefreshInterval?: number
   }>(),
   {
     sidePanelPosition: 'minimized',
@@ -52,6 +55,8 @@ const props = withDefaults(
     headerHideHeightThreshold: '40rem',
     displaySidePanel: true,
     hideSidePanelIcons: false,
+    autoRefresh: false,
+    autoRefreshInterval: 2000,
   },
 )
 
@@ -655,16 +660,39 @@ function updateViewportSize() {
 }
 
 function refresh() {
-  viewportWidth.value = window.innerWidth
-  viewportHeight.value = window.innerHeight
-  headerHeight.value = headerRef.value?.offsetHeight ?? 0
-  defaultWidth.value = defaultRef.value?.offsetWidth ?? 0
-  defaultHeight.value = defaultRef.value?.offsetHeight ?? 0
-  enforceSlotChildSizing()
-  scheduleRecalculate('manual-refresh', true)
+  try {
+    if (typeof window === 'undefined') return
+
+    viewportWidth.value = window.innerWidth
+    viewportHeight.value = window.innerHeight
+    headerHeight.value = headerRef.value?.offsetHeight ?? 0
+    defaultWidth.value = defaultRef.value?.offsetWidth ?? 0
+    defaultHeight.value = defaultRef.value?.offsetHeight ?? 0
+    enforceSlotChildSizing()
+    scheduleRecalculate('manual-refresh', true)
+  } catch (error) {
+    console.warn('[LiveFrame] Error during refresh cycle:', error)
+  }
 }
 
 defineExpose({ refresh })
+
+const { pause: pauseAutoRefresh, resume: resumeAutoRefresh } = useIntervalFn(
+  refresh,
+  () => props.autoRefreshInterval,
+  { immediate: props.autoRefresh, immediateCallback: false }
+)
+
+watch(
+  () => props.autoRefresh,
+  (shouldRefresh) => {
+    if (shouldRefresh) {
+      resumeAutoRefresh()
+    } else {
+      pauseAutoRefresh()
+    }
+  },
+)
 
 watch(
   () => props.sidePanelPosition,

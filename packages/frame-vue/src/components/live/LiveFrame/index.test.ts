@@ -272,4 +272,28 @@ describe('LiveFrame scenario runner pattern', () => {
       })
     })
   })
+
+  describe('Auto refresh feature', () => {
+    it('sets up and tears down interval based on autoRefresh prop', async () => {
+      vi.useFakeTimers()
+      const setIntervalSpy = vi.spyOn(window, 'setInterval')
+      const clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+
+      const wrapper = mount(LiveFrame, {
+        props: {
+          autoRefresh: true,
+          autoRefreshInterval: 1234,
+        },
+      })
+
+      expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 1234)
+
+      await wrapper.setProps({ autoRefresh: false } as any)
+      expect(clearIntervalSpy).toHaveBeenCalled()
+
+      setIntervalSpy.mockRestore()
+      clearIntervalSpy.mockRestore()
+      vi.useRealTimers()
+    })
+  })
 })
