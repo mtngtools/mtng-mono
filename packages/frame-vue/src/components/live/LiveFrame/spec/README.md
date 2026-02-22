@@ -47,6 +47,8 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `displaySidePanelWindowFn` | `string` | `undefined` | Optional window function name. If it exists on `window` and evaluates to truthy, the side panel system is displayed. Overrides `displaySidePanel`. |
 | `hideSidePanelIcons` | `boolean` | `false` | When `true`, suppresses default icon rendering on side panel control buttons. |
 | `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
+| `autoRefresh` | `boolean` | `false` | When `true`, automatically calls the component's internal `refresh` method intervally to recalculate and enforce layout constraints. |
+| `autoRefreshInterval` | `number` | `2000` | The interval in milliseconds at which the automated layout refresh occurs when `autoRefresh` is `true`. |
 
 ### Emits
 
