@@ -35,6 +35,7 @@ const props = withDefaults(
     enforceSlotSizingQuerySelector?: string
     autoRefresh?: boolean
     autoRefreshInterval?: number
+    refreshOnWindowEvent?: string
   }>(),
   {
     sidePanelPosition: 'minimized',
@@ -100,7 +101,7 @@ function enforceSlotChildSizing() {
     // Only apply if different to avoid unnecessary reflows/jitter
     if (child.style.height !== h) {
       child.style.height = h
-      // console.debug('enforceSlotChildSizing', child, h);
+      console.debug('[LiveFrame] enforceSlotChildSizing', h);
     }
   })
 }
@@ -668,6 +669,7 @@ function refresh() {
     headerHeight.value = headerRef.value?.offsetHeight ?? 0
     defaultWidth.value = defaultRef.value?.offsetWidth ?? 0
     defaultHeight.value = defaultRef.value?.offsetHeight ?? 0
+    console.debug ('[LiveFrame] Refreshing frame', { defaultWidth: defaultWidth.value, defaultHeight: defaultHeight.value })
     enforceSlotChildSizing()
     scheduleRecalculate('manual-refresh', true)
   } catch (error) {
@@ -771,6 +773,10 @@ onMounted(async () => {
   bindActivityListeners()
   showControlsAndRestartTimer()
 
+  if (props.refreshOnWindowEvent) {
+    window.addEventListener(props.refreshOnWindowEvent, refresh)
+  }
+
   await nextTick()
 
   resizeObserver = new ResizeObserver(() => {
@@ -797,6 +803,9 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewportSize)
+  if (props.refreshOnWindowEvent) {
+    window.removeEventListener(props.refreshOnWindowEvent, refresh)
+  }
   removeInteractionListeners?.()
   removeInteractionListeners = null
   resizeObserver?.disconnect()

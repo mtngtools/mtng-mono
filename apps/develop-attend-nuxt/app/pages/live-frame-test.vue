@@ -17,6 +17,8 @@ const overlayOnly = ref(false);
 const hideSidePanelIcons = ref(false);
 const transitions = ref<string[]>([]);
 const enforceSlotSizingQuerySelector = ref<string>('');
+const autoRefresh = ref(true);
+const autoRefreshInterval = ref(2000);
 
 const transitionLog = computed(() => transitions.value.slice(0, 10));
 
@@ -81,6 +83,8 @@ function onAvailableStates(payload: {
     display-side-panel-window-fn="checkExternalDisplayState"
     :hide-side-panel-icons="hideSidePanelIcons"
     :enforce-slot-sizing-query-selector="enforceSlotSizingQuerySelector || undefined"
+    :auto-refresh="autoRefresh"
+    :auto-refresh-interval="autoRefreshInterval"
     @side-panel-transition="onTransition"
     @side-panel-available-states="onAvailableStates"
   >
@@ -193,6 +197,21 @@ function onAvailableStates(payload: {
         <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
           <input id="hide-side-panel-icons" v-model="hideSidePanelIcons" type="checkbox">
           <label for="hide-side-panel-icons" class="text-neutral-400">Hide Side Panel Icons</label>
+        </div>
+
+        <div :style="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+          <input id="auto-refresh" v-model="autoRefresh" type="checkbox">
+          <label for="auto-refresh" class="text-neutral-400">Auto Refresh</label>
+        </div>
+
+        <div :style="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
+          <label for="auto-refresh-interval" class="text-neutral-400">Auto Refresh Interval (ms)</label>
+          <input 
+            id="auto-refresh-interval" 
+            v-model.number="autoRefreshInterval"
+            type="number"
+            class="bg-neutral-900 border border-neutral-700 px-2 py-1 rounded text-neutral-100 outline-none focus:border-accent"
+          >
         </div>
         
         <div :style="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
