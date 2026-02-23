@@ -49,6 +49,7 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `enforceSlotSizingQuerySelector` | `string` | `undefined` | Optional CSS selector to identify elements for height enforcement. When provided, selects from within the `default` slot container. If omitted, targets only direct children. |
 | `autoRefresh` | `boolean` | `false` | When `true`, automatically calls the component's internal `refresh` method intervally to recalculate and enforce layout constraints. |
 | `autoRefreshInterval` | `number` | `2000` | The interval in milliseconds at which the automated layout refresh occurs when `autoRefresh` is `true`. |
+| `refreshOnWindowEvent` | `string` | `undefined` | Optional window event-name string. When provided, the component attaches an event listener to `window` for this event name to manually trigger its internal `refresh` method. |
 
 ### Emits
 
