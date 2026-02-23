@@ -36,6 +36,7 @@ const props = withDefaults(
     autoRefresh?: boolean
     autoRefreshInterval?: number
     refreshOnWindowEvent?: string
+    shouldConsoleDebug?: boolean
   }>(),
   {
     sidePanelPosition: 'minimized',
@@ -58,6 +59,7 @@ const props = withDefaults(
     hideSidePanelIcons: false,
     autoRefresh: false,
     autoRefreshInterval: 2000,
+    shouldConsoleDebug: false,
   },
 )
 
@@ -95,13 +97,14 @@ function enforceSlotChildSizing() {
     : (Array.from(container.children) as HTMLElement[])
 
   const h = `${defaultHeight.value}px`
-  // console.debug('enforceSlotChildSizing', props.enforceSlotSizingQuerySelector, h);
 
   children.forEach((child) => {
     // Only apply if different to avoid unnecessary reflows/jitter
     if (child.style.height !== h) {
       child.style.height = h
-      console.debug('[LiveFrame] enforceSlotChildSizing', h);
+      if (props.shouldConsoleDebug) {
+        console.debug('[LiveFrame] enforceSlotChildSizing', h)
+      }
     }
   })
 }
@@ -669,7 +672,9 @@ function refresh() {
     headerHeight.value = headerRef.value?.offsetHeight ?? 0
     defaultWidth.value = defaultRef.value?.offsetWidth ?? 0
     defaultHeight.value = defaultRef.value?.offsetHeight ?? 0
-    console.debug ('[LiveFrame] Refreshing frame', { defaultWidth: defaultWidth.value, defaultHeight: defaultHeight.value })
+    if (props.shouldConsoleDebug) {
+      console.debug('[LiveFrame] Refreshing frame', { defaultWidth: defaultWidth.value, defaultHeight: defaultHeight.value })
+    }
     enforceSlotChildSizing()
     scheduleRecalculate('manual-refresh', true)
   } catch (error) {

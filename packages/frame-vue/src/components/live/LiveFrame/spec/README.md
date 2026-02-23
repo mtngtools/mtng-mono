@@ -50,6 +50,7 @@ Shared type and event definitions live in `packages/frame-vue/src/components/liv
 | `autoRefresh` | `boolean` | `false` | When `true`, automatically calls the component's internal `refresh` method intervally to recalculate and enforce layout constraints. |
 | `autoRefreshInterval` | `number` | `2000` | The interval in milliseconds at which the automated layout refresh occurs when `autoRefresh` is `true`. |
 | `refreshOnWindowEvent` | `string` | `undefined` | Optional window event-name string. When provided, the component attaches an event listener to `window` for this event name to manually trigger its internal `refresh` method. |
+| `shouldConsoleDebug` | `boolean` | `false` | When `true`, enables debug logging to the console. |
 
 ### Emits
 
