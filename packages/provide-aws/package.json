@@ -1,0 +1,47 @@
+{
+  "name": "@mtngtools/provide-aws",
+  "version": "0.1.0",
+  "description": "AWS provider functions for mtngTOOLS",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src"
+  },
+  "keywords": [
+    "aws",
+    "s3",
+    "mtngtools",
+    "typescript"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@mtngtools/core": "workspace:^",
+    "@aws-sdk/client-s3": "^3.503.1"
+  },
+  "devDependencies": {
+    "oxlint": "^1.26.0",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.7.0",
+    "vite": "8.0.0-beta.13",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}
