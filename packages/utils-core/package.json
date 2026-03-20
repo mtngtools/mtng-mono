@@ -1,7 +1,7 @@
 {
   "name": "@mtngtools/utils-core",
   "version": "0.1.0",
-  "description": "Core utility functions shared across mtngTOOLS packages",
+  "description": "Core types shared across mtngTOOLS packages",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -13,7 +13,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
@@ -28,7 +30,10 @@
     "test:coverage": "vitest run --coverage",
     "test:typecheck": "tsc --noEmit --skipLibCheck tests/**/*.ts"
   },
-  "keywords": ["utils", "mtngtools", "typescript"],
+  "keywords": [
+    "mtngtools",
+    "typescript"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"
