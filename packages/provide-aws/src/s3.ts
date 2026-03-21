@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command, HeadObjectCommand, PutObjectCommandInput, GetObjectCommandInput, GetObjectCommandOutput } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand, PutObjectCommandInput, GetObjectCommandInput, GetObjectCommandOutput } from "@aws-sdk/client-s3";
 import { returnError, returnResult } from "@mtngtools/core";
 
 // let s3Client: S3Client | null = null;
