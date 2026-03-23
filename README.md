@@ -1,51 +1,58 @@
-# mtngTOOLS Monorepo
+# mtngTOOLS Overview
 
-Shared packages for the mtngTOOLS suite (medical conference video platforms). This repo contains **UTILS**, **CORE**, **FRAME**, and **PROVIDE** packages, plus a **sub** folder for Git submodules (e.g. the HLS repo). See the [code organization overview](../overview/code-organization.md) for layers and dependency rules.
+**mtngTOOLS** is a suite of tools and libraries for medical conference video platforms, covering attendee experiences and production logistics.
 
-## Layout
+## High-Level Overview
 
-- **`packages/*`** — Publishable libraries (e.g. utils-core, frame-vue, frame-nuxt).
-- **`apps/*`** — Reference applications (COMPOSE layer, e.g. compose-ref-attend-aws-nuxt-mux).
-- **`sub/*`** — Git submodules (e.g. [mtngtools/hls](https://github.com/mtngtools/hls) at `sub/hls` — HLS packages + CLI). See [SUBMODULES.md](./SUBMODULES.md) and [sub/README.md](./sub/README.md).
+**Online Applications**
+*   **Attendee Portal**: Live streaming and VOD playback. Future expansion to additional areas.
+*   **Administration**: Content management and integrations with meeting vendors and video platforms (e.g., Mux).
 
-## Packages
+**Production & Post-production**
+*   **Media Automation**: Provisioning live streams and managing archive workflows (marking, encoding, publishing, quality control).
+*   **In-Room Tools**: Speaker timers and digital displays.
+*   **Logistics**: Data visualization for staff.
 
-| Package | Description |
-| :--- | :--- |
-| `@mtngtools/utils-core` | Core utility functions shared across packages. |
-| `@mtngtools/frame-vue` | Vue.js component and composable library (for use via Nuxt module). |
-| `@mtngtools/frame-nuxt` | Nuxt modules and layers (e.g. `modules/frame-vue`, `layers/base`, `layers/admin`). |
+**Common Foundation**
+*   **Data-Driven**: Unified data source ensures consistency across all tools, transformed as necessary.
+*   **Shared Components**: Consistent UI and logic via shared libraries.
+*   **Composable**: Reference architectures adaptable to specific organizational needs.
 
-## Apps (COMPOSE)
+## Context & Motivation
 
-| App | Description |
-| :--- | :--- |
-| `compose-ref-attend-aws-nuxt-mux` | Reference attendee site — AWS + Nuxt + Mux. |
+*   **Varied Requirements**: Organizations share core needs (video delivery, schedule management) but differ in specific requirements and budget/time trade-offs.
+*   **Managed Complexity**: While modern tooling facilitates code generation, a cohesive, tested architecture is essential to manage the complexity of interconnected systems. Even if AI can generate the code, give it a reliable starting point.
+*   **Flexible Integration**: Data sources and decision-making processes vary by organization. The platform is designed to integrate with existing systems rather than mandating a specific workflow.
 
-## Submodules
+## Guiding Principles
 
-- **HLS** — [mtngtools/hls](https://github.com/mtngtools/hls) at `sub/hls`. Clone with `--recurse-submodules` or run `git submodule update --init --recursive`. See [SUBMODULES.md](./SUBMODULES.md).
+*   **Composability**: Solutions built from reusable components with clear separation of concerns.
+*   **Customization**: Reference architectures designed as extensible starting points.
+*   **Deployment Flexibility**: Support for various environments (on-prem, cloud, hybrid).
+*   **Maintainability**: Modular architecture promoting independent component evolution and testability.
 
-## Getting started
+## Code Organization
 
-```bash
-pnpm install
-pnpm run typecheck
-pnpm run lint
-pnpm run build
-pnpm run test
-```
+Repositories are organized into groups to enforce modularity and dependencies:
 
-## Development
+*   **UTILS** (`utils-core`, `utils-hls`, `utils-unstorage`)
+    *   Domain-agnostic technical libraries and helpers.
+    *   External dependencies limited to types and interfaces.
+*   **CORE** (`core`, `core-types`, `core-plus`)
+    *   Pure business logic, types, and interfaces specific to the Medical Conference domain.
+    *   Can depend on: `UTILS`.
+*   **FRAME** (`frame-vue`, `frame-nuxt`)
+    *   Implementation libraries using a structured framework (such as VueJS or Nuxt).
+    *   Can depend on: `UTILS` and `CORE`.
+*   **PROVIDE** (`provide-aws`, `provide-aws-unstorage`, `provide-mux`): Implementations of core interfaces for specific services.
+    *   Can depend on: `UTILS` and `CORE`.
+*   **COMPOSE**: Working reference solutions and concrete implementations using the above layers.
+    *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
+*   **DEVELOP**: Additional sites and libraries to assist in the development process (e.g., sandbox sites).
+    *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
+*   **BUILD**: Infrastructure shell (gitmodules, pnpm workspaces, turbo build).
 
-- **Package manager**: [pnpm](https://pnpm.io) (workspaces)
-- **Build / tasks**: [Turbo](https://turbo.build)
-- **Releases**: [Changesets](https://github.com/changesets/changesets) (add a changeset with `pnpm changeset` for versioned changes)
+### This is complicated. Why the complexity? 
+Dependency managment is hard. In order for each reference solution to minimize dependencies, components are broken down into smaller, more manageable pieces.
 
-## Specifications
-
-See [spec/README.md](./spec/README.md) and per-package `spec/` directories.
-
-## Agent guidance
-
-Repository-level agent guidance: [AGENTS_REPO.md](./AGENTS_REPO.md). Organization-level and stack guidance: [mtngtools/agents](https://github.com/mtngtools/agents).
+See [package-directory.md](package-directory.md) for details.
