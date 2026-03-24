@@ -1,3 +1,4 @@
+import { Simplify } from "@mtngtools/utils-core";
 import { BaseEnv } from "../app-env";
 
 export type TzConfig = {
@@ -11,59 +12,70 @@ export type MeetingBase = {
 }
 
 export type Meeting = MeetingBase & {
-    mtSlug: string,
+    mtSlug?: string,
     mtName: string,
 } & TzConfig;
 
 export type BaseEnvMeeting = BaseEnv & MeetingBase;
 
 export type RoomSource = {
-    rmSourceKey: string,
+    rmSourceId: string,
 }
 
-export type RoomBase = {
-    rmKey: string,
+export type HasRoomId = {
+    rmId: string,
+}
+
+export type RoomBase = Simplify<HasRoomId & {
+    rmSlug?: string,
     rmName?: string,
     rmFullName?: string,
-}
+    rmType?: string,
+    rmTags?: string[],
+    rmMetadata?: Record<string, unknown>,
+}>;
 
 export type Room = RoomBase & {
-    rmSourceKey: string,
-    rmSlug: string,
     rmShortName?: string,
     rmVenue?: string,
     rmVenueSection?: string,
     isMain?: boolean,
-}
+} & Partial<RoomSource>
 
-export type SessionBase = {
+export type SessionBase = Simplify<{
     ssId: string,
-    ssSlug: string,
+    ssSlug?: string,
     ssTitle: string,
     ssStart: number,
     ssEnd: number,
-    ssStartStr: string,
-    ssEndStr: string,
+    ssStartStr?: string,
+    ssEndStr?: string,
     qaLink?: string,
-}
+    ssType?: string,
+    ssTags?: string[],
+    ssMetadata?: Record<string, unknown>,
+} & Partial<HasRoomId>>;
 
 export type PresentationBase = {
     prId: string,
     prAltId?: string,
     prAbstractId?: string,
-    prSlug: string,
+    prSlug?: string,
     prTitle: string,
     prAltTitle?: string,
     prStart: number,
     prEnd: number,
-    prStartStr: string,
-    prEndStr: string,
+    prStartStr?: string,
+    prEndStr?: string,
+    prType?: string,
+    prTags?: string[],
+    prMetadata?: Record<string, unknown>,
 }
 
 export type SpeakerBase = {
     spId: string,
     spAltId?: string,
-    spSlug: string,
+    spSlug?: string,
     spFullName: string,
     spFirstName?: string,
     spLastName?: string,
@@ -71,21 +83,37 @@ export type SpeakerBase = {
     spOrgName?: string,
     spOrgLoc?: string,
     spEmail?: string,
-    spOrder?: string,
+    spOrder?: string | number,
     spPicURL?: string,
+    spMetadata?: Record<string, unknown>,
 }
 
 export type PresentationFull = PresentationBase & {
-    speakers: SpeakerBase[];
+    prSpeakers: SpeakerBase[];
 }
 
 export type SessionWithPres = SessionBase & {
-    presentations: PresentationFull[],
-    moderators?: SpeakerBase[];
+    ssPresentations: PresentationFull[],
+    ssModerators?: SpeakerBase[];
 }
 
-export type SessionWithRoom = SessionBase & Room
+export type SessionWithRoom = Simplify<SessionBase & Room>
 
-export type SessionWithRoomAndPres = SessionBase & Room & { presentations: PresentationFull[] }
+export type SessionWithRoomAndPres = SessionBase & Room & { ssPresentations: PresentationFull[] }
+
+export type ResolvedSpeaker = SpeakerBase & Required<Pick<SpeakerBase, "spSlug">>;
+
+export type ResolvedPresentation = PresentationBase & Required<Pick<PresentationBase, "prSlug" | "prStartStr" | "prEndStr">> & { 
+    prSpeakers: ResolvedSpeaker[];
+};
+
+export type ResolvedSession = SessionBase & Required<Pick<SessionBase, "ssSlug" | "ssStartStr" | "ssEndStr">> & {
+    ssPresentations: ResolvedPresentation[];
+    ssModerators: ResolvedSpeaker[];
+};
+
+export type ResolvedRoom = Room & Required<Pick<Room, "rmSlug" | "rmName" | "rmFullName">>;
+
+export type ResolvedMeeting = Required<Meeting>;
 
 

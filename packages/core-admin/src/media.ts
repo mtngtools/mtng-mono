@@ -47,7 +47,7 @@ export const genMuxAssetEncodeInput = (basicEncodeInput: BasicEncodeInput, asset
         provider: INPUT_MUX_ASSET,
         assetId,
         plId: plId ?? plSlug,
-        presentations: [plSlug],
+        presentationIds: [plSlug],
         createdAt: Date.now(),
         id: genUniqueId('encinp'),
     } as EncodeInput
