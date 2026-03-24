@@ -76,6 +76,7 @@ Additional sites and libraries to assist in the development process, such as san
 | Repository | Description | Repo | Status |
 | :--- | :--- | :--- | :--- |
 | `develop-attend-nuxt` | Development attendee site for Nuxt. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
+| `develop-mock-data` | Mocking library for various types of meetings for demos and code tests. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | planned |
 
 ## BUILD (future)
 
