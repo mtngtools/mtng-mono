@@ -73,10 +73,10 @@ Working reference solutions and concrete implementations. Can depend on: `UTILS`
 
 Additional sites and libraries to assist in the development process, such as sandbox sites to show use of library items in a working site.
 
-| Repository | Description | Repo | Status |
+| Package | Description | Repo | Status |
 | :--- | :--- | :--- | :--- |
 | `develop-attend-nuxt` | Development attendee site for Nuxt. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
-| `develop-mock-data` | Mocking library for various types of meetings for demos and code tests. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | planned |
+| `develop-mock-data` | Recipe-driven deterministic mock meeting data (rooms, sessions, presentations, speakers) for tests and demos without production data. See [package README](packages/develop-mock-data/README.md). | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 
 ## BUILD (future)
 

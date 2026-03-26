@@ -48,11 +48,11 @@ Repositories are organized into groups to enforce modularity and dependencies:
     *   Can depend on: `UTILS` and `CORE`.
 *   **COMPOSE**: Working reference solutions and concrete implementations using the above layers.
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
-*   **DEVELOP**: Additional sites and libraries to assist in the development process (e.g., sandbox sites).
+*   **DEVELOP**: Additional sites and libraries to assist in the development process (e.g., sandbox sites, mock meeting data for tests and demos).
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
 *   **BUILD**: Infrastructure shell (gitmodules, pnpm workspaces, turbo build).
 
 ### This is complicated. Why the complexity? 
-Dependency managment is hard. In order for each reference solution to minimize dependencies, components are broken down into smaller, more manageable pieces.
+Dependency management is hard. In order for each reference solution to minimize dependencies, components are broken down into smaller, more manageable pieces.
 
 See [package-directory.md](package-directory.md) for details.

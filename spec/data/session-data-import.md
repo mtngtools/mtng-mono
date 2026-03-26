@@ -35,6 +35,10 @@ export interface SessionSummary {
 - Factory functions: `createMockSession(overrides)`, `createMockRoom(overrides)`.
 - Pre-packaged "mock events" (e.g., 1-day, multi-track) for UI demos.
 - Utilities for simulated delay or varied data formats.
+- Package-level details and recipe contracts live in:
+  - [`../../packages/develop-mock-data/spec/README.md`](../../packages/develop-mock-data/spec/README.md)
+  - [`../../packages/develop-mock-data/spec/recipe-model.md`](../../packages/develop-mock-data/spec/recipe-model.md)
+  - [`../../packages/develop-mock-data/spec/recipe-examples.md`](../../packages/develop-mock-data/spec/recipe-examples.md)
 
 ## Importing & Transformation Utilities
 Reusable pipes for non-conforming raw data.
