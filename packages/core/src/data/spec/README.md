@@ -1,6 +1,6 @@
 # Meeting Data Patterns and Inconsistencies
 
-This document outlines the architectural patterns and naming conventions discovered in the `mtngTOOLS` core data layer, specifically within [meeting.ts](file:///Users/jasonbulson/Documents/_work/temp-mono/sub/mtng-mono/packages/core/src/data/meeting.ts).
+This document outlines the architectural patterns and naming conventions discovered in the `mtngTOOLS` core data layer, specifically within [meeting.ts](../../meeting.ts).
 
 ## Naming Rules (Prefixes)
 Each major entity type uses a consistent two-letter prefix for its properties to avoid naming collisions when types are intersected.

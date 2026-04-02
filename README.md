@@ -1,35 +1,50 @@
 # mtngTOOLS Overview
 
-**mtngTOOLS** is a suite of tools and libraries for medical conference video platforms, covering attendee experiences and production logistics.
+**mtngTOOLS** is a suite of tools and code libraries for conferences and meetings, primarily those delivering presentations organized into sessions.
 
-## High-Level Overview
+Domain and mtngTOOLS organization terms are summarized in [GLOSSARY.md](GLOSSARY.md).
 
-**Online Applications**
-*   **Attendee Portal**: Live streaming and VOD playback. Future expansion to additional areas.
-*   **Administration**: Content management and integrations with meeting vendors and video platforms (e.g., Mux).
+## Solution Domains
 
-**Production & Post-production**
-*   **Media Automation**: Provisioning live streams and managing archive workflows (marking, encoding, publishing, quality control).
-*   **In-Room Tools**: Speaker timers and digital displays.
-*   **Logistics**: Data visualization for staff.
+### Current Focus
 
-**Common Foundation**
-*   **Data-Driven**: Unified data source ensures consistency across all tools, transformed as necessary.
-*   **Shared Components**: Consistent UI and logic via shared libraries.
-*   **Composable**: Reference architectures adaptable to specific organizational needs.
+*   **Watch**: Live and on-demand video for **virtual** attendees.
+*   **Interact**: Q&A and polling **integrations with external providers**, not native mtngTOOLS.
+
+### Planned and Future
+
+*   **Watch**: On-site session viewing.
+*   **Produce**: Data-driven run-of-show, presentation timers, digital displays.
+*   **Interact**: Chat through **integrations with external providers**, not native mtngTOOLS.
+
+## Product Surfaces
+
+Where the tools are deployed:
+
+*   **Online Applications**
+    *   **Attendee Portal**: Live streaming and VOD playback. Future expansion to additional areas.
+    *   **Administration**: 
+        *   Data management and visualization.
+        *   Resource assignment (staff, live stream, etc.).
+        *   Live and archived video workflows (marking, encoding, publishing, quality control).
+        *   Integrations with other meeting vendors and video platforms (e.g., Mux).
+*   **On-site Tools**: Speaker timers and digital displays.
+    *   **Logistics**: Data management and visualization for staff.
 
 ## Context & Motivation
 
-*   **Varied Requirements**: Organizations share core needs (video delivery, schedule management) but differ in specific requirements and budget/time trade-offs.
-*   **Managed Complexity**: While modern tooling facilitates code generation, a cohesive, tested architecture is essential to manage the complexity of interconnected systems. Even if AI can generate the code, give it a reliable starting point.
-*   **Flexible Integration**: Data sources and decision-making processes vary by organization. The platform is designed to integrate with existing systems rather than mandating a specific workflow.
+*   **Fit and Integration**: Organizations share core needs (video, schedules) but differ in requirements, budgets, data sources, and workflows. The platform is meant to **integrate** with existing systems instead of mandating one stack.
+*   **Why Structure Matters**: These products are interconnected; a cohesive, tested foundation limits reliance on ad hoc glue, including when AI tools make generating code inexpensive.
 
 ## Guiding Principles
 
-*   **Composability**: Solutions built from reusable components with clear separation of concerns.
-*   **Customization**: Reference architectures designed as extensible starting points.
-*   **Deployment Flexibility**: Support for various environments (on-prem, cloud, hybrid).
-*   **Maintainability**: Modular architecture promoting independent component evolution and testability.
+*   **Data-Driven**: Core underlying data model, transformed as needed.
+*   **Shared Components**: Shared libraries for UI and logic—usable as-is or as a starting point to fork and extend.
+*   **Composability**: Prefer reusable pieces with clear boundaries (see **Code Organization**).
+*   **Reference Architectures**: Composable stacks you can extend; shared layers rather than a single fixed application.
+*   **Deployment Flexibility**: On-prem, cloud, or hybrid.
+*   **Scale**: Online applications structured for traffic bursts and high concurrency.
+*   **Maintainability**: Modules that can evolve and be tested on their own.
 
 ## Code Organization
 
@@ -39,10 +54,10 @@ Repositories are organized into groups to enforce modularity and dependencies:
     *   Domain-agnostic technical libraries and helpers.
     *   External dependencies limited to types and interfaces.
 *   **CORE** (`core`, `core-types`, `core-plus`)
-    *   Pure business logic, types, and interfaces specific to the Medical Conference domain.
+    *   Pure business logic, types, and interfaces specific to the conference and meeting domain.
     *   Can depend on: `UTILS`.
 *   **FRAME** (`frame-vue`, `frame-nuxt`)
-    *   Implementation libraries using a structured framework (such as VueJS or Nuxt).
+    *   Implementation libraries using a structured framework (such as Vue.js or Nuxt).
     *   Can depend on: `UTILS` and `CORE`.
 *   **PROVIDE** (`provide-aws`, `provide-aws-unstorage`, `provide-mux`): Implementations of core interfaces for specific services.
     *   Can depend on: `UTILS` and `CORE`.
@@ -52,7 +67,8 @@ Repositories are organized into groups to enforce modularity and dependencies:
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
 *   **BUILD**: Infrastructure shell (gitmodules, pnpm workspaces, turbo build).
 
-### This is complicated. Why the complexity? 
-Dependency management is hard. In order for each reference solution to minimize dependencies, components are broken down into smaller, more manageable pieces.
+### Why this structure?
+
+Dependency management is difficult. Reference solutions keep dependencies small by splitting work into narrower packages.
 
 See [package-directory.md](package-directory.md) for details.
