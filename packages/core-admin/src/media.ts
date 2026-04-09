@@ -9,9 +9,9 @@ export type LiveStream = {
     playbackId?: string,
     signedPlaybackId?: string,
     streamKey: string,
-    providerData: Object,
+    providerData: object,
     roomName: string,
-    rmSlug?: string,
+    rmId?: string,
 }
 
 export type LiveStreamWithPublicPlayback = LiveStream
@@ -42,12 +42,13 @@ export type EncodeInput<
 
 export const genMuxAssetEncodeInput = (basicEncodeInput: BasicEncodeInput, assetId: string) => {
     const { plSlug, plId } = basicEncodeInput;
+    const id = plId ?? plSlug;
     return {
         ...basicEncodeInput,
         provider: INPUT_MUX_ASSET,
         assetId,
-        plId: plId ?? plSlug,
-        presentationIds: [plSlug],
+        plId: id,
+        presentationIds: [id],
         createdAt: Date.now(),
         id: genUniqueId('encinp'),
     } as EncodeInput
@@ -63,7 +64,7 @@ export type BaseEncodeInputResponse = {
 } & Partial<HasMessage> & HasCreated;
 
 export type BaseMuxEncodeInputResponse = BaseEncodeInputResponse & {
-    convertedInput: Object
+    convertedInput: object
 }
 
 export type AcceptedMuxEncodeInputResponse = BaseMuxEncodeInputResponse & {
@@ -71,7 +72,7 @@ export type AcceptedMuxEncodeInputResponse = BaseMuxEncodeInputResponse & {
     provider: typeof MUX,
     streamLocation: string,
     signedStreamLocation: string,
-    muxResponse: Object,
+    muxResponse: object,
 } & HasId
 
 // export type PendingEncodeInputResponse = BaseMuxEncodeInputResponse & {

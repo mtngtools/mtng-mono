@@ -20,7 +20,7 @@ Definitions aligned with [README.md](README.md) and the [`core`](packages/core) 
 - **Organization directory (`orgDir`)**: Stable org-scoped path segment used in keys and config. For example `acme`.
 - **Meeting directory (`mtDir`)**: Stable meeting-scoped directory segment; short string identifier for a meeting. For example `2026demo`.
 - **Operation environment (`opEnv`)**: Deployment lifecycle environment. For example, `rnd`, `dev`, `qa`, `review`, `prod`.
-- **Application role (`roleName`)**: Access audience for that deployment. For example, `admin`, `attendee`, `integration` (`ROLE_NAME_*`).
+- **Application role (`applRole`)**: Primary access audience for that application. For example, `admin`, `attendee`, `integration` (`ROLE_NAME_*`).
 - **Application name (`applName`)**: Used when multiple variants serving the same role need to be deployed for an organization. For example, an `admin` site for `watch` and a different one for `produce`.
 
 ## Meeting Model (`core` / `data/meeting`)
