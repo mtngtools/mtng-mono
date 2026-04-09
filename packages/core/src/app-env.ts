@@ -31,23 +31,29 @@ export type HasCreatedUpdated = {
     updatedAt: string,
 }
 
-export type HasApplName = {
-    applName: string,
+export const SOLUTION_DOMAIN_MULTI = "multi" as const; 
+export const SOLUTION_DOMAIN_WATCH = "watch" as const;
+export const SOLUTION_DOMAIN_PRODUCE = "produce" as const;
+export const SOLUTION_DOMAIN_INTERACT = "interact" as const;
+
+export type HasSolutionDomain = {
+    solutionDomain: typeof SOLUTION_DOMAIN_MULTI | typeof SOLUTION_DOMAIN_WATCH | typeof SOLUTION_DOMAIN_PRODUCE | typeof SOLUTION_DOMAIN_INTERACT | string,
 }
 
-export const APPL_NAME_VIRT = "virt";
+export const ROLE_NAME_ATTEND = "attend" as const;
+export const ROLE_NAME_ADMIN = "admin" as const;
+export const ROLE_NAME_PUBLIC = "public" as const;
+export const ROLE_NAME_INTEGRATION = "integ" as const;
 
-export type HasRoleName = {
-    roleName: string,
-}
+export type HasApplRole = {
+    applRole: typeof ROLE_NAME_ADMIN | typeof ROLE_NAME_PUBLIC | typeof ROLE_NAME_ATTEND | typeof ROLE_NAME_INTEGRATION | string,
+}    
 
-export const ROLE_NAME_ADMIN = "admin";
-export const ROLE_NAME_PUBLIC = "public";
-export const ROLE_NAME_INTEGRATION = "integ";
+export const APPL_VARIANT_PRIMARY = "primary" as const; // primary application for a solution domain, assumed to be this if not set on FullEnv
 
 export type HasApplVariant = {
-    applVariant: string,
+    applVariant: typeof APPL_VARIANT_PRIMARY | string,
 }
 
-export type FullEnv = BaseEnv & HasApplName & HasRoleName
+export type FullEnv = BaseEnv & HasSolutionDomain & HasApplRole
     & Partial<HasApplVariant>;
