@@ -17,11 +17,16 @@ Definitions aligned with [README.md](README.md) and the [`core`](packages/core) 
 
 ## Environment and Roles (`core` / `app-env`)
 
+Full detail: [packages/core/spec/app-env.md](packages/core/spec/app-env.md).
+
 - **Organization directory (`orgDir`)**: Stable org-scoped path segment used in keys and config. For example `acme`.
 - **Meeting directory (`mtDir`)**: Stable meeting-scoped directory segment; short string identifier for a meeting. For example `2026demo`.
-- **Operation environment (`opEnv`)**: Deployment lifecycle environment. For example, `rnd`, `dev`, `qa`, `review`, `prod`.
-- **Application role (`applRole`)**: Primary access audience for that application. For example, `admin`, `attendee`, `integration` (`ROLE_NAME_*`).
-- **Application name (`applName`)**: Used when multiple variants serving the same role need to be deployed for an organization. For example, an `admin` site for `watch` and a different one for `produce`.
+- **Operation environment (`opEnv`)**: Deployment lifecycle stage. Canonical values: `dev`, `qa`, `review`, `prod` (`OP_ENV_*` in code); additional `string` values allowed for custom sandboxes.
+- **Solution domain (`solutionDomain`)**: Product line slice (`watch`, `produce`, `interact`, or `default`). See `SOLUTION_DOMAIN_*` in `app-env`.
+- **Application role (`applRole`)**: Primary audience or surface for the deployment (`attend`, `admin`, `public`, `integ`, or `default`). See `ROLE_NAME_*` in `app-env` (`integ` is the integration surface).
+- **Application variant (`applVariant`)**: Distinguishes multiple apps of the same role in a solution domain; `primary` is the default (`APPL_VARIANT_PRIMARY`).
+- **Storage role (`storageRole`)**: Purpose of a storage resource for naming (e.g. static assets, state, data). See `STORAGE_*` in `app-env` and `resolveStorageEnv`.
+- **Application name (`applName`)**: (Broader docs) Used when multiple variants serving the same role need distinct labels; overlaps conceptually with **application variant** and naming in composed apps.
 
 ## Meeting Model (`core` / `data/meeting`)
 
