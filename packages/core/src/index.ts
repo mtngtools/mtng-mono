@@ -1,4 +1,5 @@
 export * from './app-env';
+export * from './app-naming';
 export * from './data/meeting';
 export * from './data/meeting-keys';
 export * from './media'
