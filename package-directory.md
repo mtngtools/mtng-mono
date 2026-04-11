@@ -78,6 +78,31 @@ Additional sites and libraries to assist in the development process, such as san
 | `develop-attend-nuxt` | Development attendee site for Nuxt. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 | `develop-mock-data` | Recipe-driven deterministic mock meeting data (rooms, sessions, presentations, speakers) for tests and demos without production data. See [package README](packages/develop-mock-data/README.md). | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 
+## DEPLOY
+
+Libraries and tooling for **shipping** and **operating** deployed solutions (release automation, deployment packaging, CI helpers, infrastructure-as-code). Distinct from **PROVIDE** (runtime bindings to external services) and **BUILD** (workspace shell). Can depend on: `UTILS`, `CORE`, `FRAME`, `PROVIDE`, and `COMPOSE`.
+
+Naming (details and examples: [spec/deploy/naming-and-orchestration.md](spec/deploy/naming-and-orchestration.md)):
+
+*   **`deploy-*`**: Reusable deployment **libraries** (constructs, shared stacks, helpers).
+*   **`deploy-recipe-*`**: **Deployment recipes**—one deployable slice (shared infra, or one app surface). Name by **pattern** + **ref** + optional **slice** (e.g. `deploy-recipe-aws-nuxt-ref-1a-attend`). Shared-only recipes may use a different pattern prefix when they serve **multiple app types** (not only Nuxt).
+*   **`deploy-suite-*`**: **Deployment suites**—orchestrate several `deploy-recipe-*` packages via workspace deps and pnpm scripts; not a slice.
+
+### `deploy-*` (libraries)
+
+| Package | Description | Repo | Status |
+| :--- | :--- | :--- | :--- |
+
+### `deploy-recipe-*` (recipes)
+
+| Package | Description | Repo | Status |
+| :--- | :--- | :--- | :--- |
+
+### `deploy-suite-*` (suites)
+
+| Package | Description | Repo | Status |
+| :--- | :--- | :--- | :--- |
+
 ## BUILD (future)
 
 Infrastructure shell. Once packages are split from the initial mono-repo, build repositories will provide the pnpm workspace and turbo build configuration. 

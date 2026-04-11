@@ -65,10 +65,15 @@ Repositories are organized into groups to enforce modularity and dependencies:
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
 *   **DEVELOP**: Additional sites and libraries to assist in the development process (e.g., sandbox sites, mock meeting data for tests and demos).
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
+*   **DEPLOY**: Libraries and tooling for **shipping** and **operating** deployed solutions (release automation, deployment packaging, CI helpers, infrastructure-as-code). Distinct from **PROVIDE** (runtime service bindings) and **BUILD** (monorepo workspace shell).
+    *   **`deploy-*`**: Reusable deployment **libraries** (e.g. shared CDK constructs, packaging helpers).
+    *   **`deploy-recipe-*`**: **Deployment recipes**—opinionated wiring that composes constructs and packages apps for deployment. Name the recipe after the **deployment pattern** or stack, not a single COMPOSE package slug; one recipe may deploy **several** similar composed apps when they share enough infra and process.
+    *   **`deploy-suite-*`**: **Deployment suites**—meta-packages that orchestrate multiple recipes (scripts, workspace wiring, optional thin CDK entrypoints). The suite name has **no** slice suffix; slices are separate `deploy-recipe-*` packages. See [spec/deploy/](spec/deploy/).
+    *   Can depend on: `UTILS`, `CORE`, `FRAME`, `PROVIDE`, and `COMPOSE`.
 *   **BUILD**: Infrastructure shell (gitmodules, pnpm workspaces, turbo build).
 
 ### Why this structure?
 
 Dependency management is difficult. Reference solutions keep dependencies small by splitting work into narrower packages.
 
-See [package-directory.md](package-directory.md) for details.
+See [package-directory.md](package-directory.md) and [spec/deploy/](spec/deploy/) for deployment naming, suites, and scripts.
