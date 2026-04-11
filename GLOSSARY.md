@@ -53,4 +53,5 @@ Short names from README; each maps to packages or apps in the monorepo.
 - **PROVIDE**: Service implementations of core interfaces (`provide-aws`, `provide-mux`, etc.).
 - **COMPOSE**: Reference applications composing the layers.
 - **DEVELOP**: Sandboxes, mocks, and dev aids.
+- **DEPLOY**: Release and deployment tooling—**`deploy-*`** libraries (e.g. reusable CDK constructs), **`deploy-recipe-*`** deployment recipes (slices: shared infra or one app surface), and **`deploy-suite-*`** meta-packages that orchestrate multiple recipes. Distinct from **PROVIDE** (service bindings) and **BUILD** (workspace shell). See [spec/deploy/](spec/deploy/).
 - **BUILD**: Workspace and build wiring (pnpm, turbo, submodules).

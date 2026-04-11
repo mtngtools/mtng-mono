@@ -6,7 +6,7 @@
 ## Purpose
 
 - Reference app others can copy and deploy with little custom code.
-- Layering follows [README.md](../../../README.md) and [package-directory.md](../../../package-directory.md) (UTILS, CORE, FRAME, PROVIDE).
+- Layering follows [README.md](../../../README.md) and [package-directory.md](../../../package-directory.md) (UTILS, CORE, FRAME, PROVIDE, COMPOSE, DEVELOP, DEPLOY, BUILD).
 
 ## Out of scope
 
