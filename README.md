@@ -66,9 +66,9 @@ Repositories are organized into groups to enforce modularity and dependencies:
 *   **DEVELOP**: Additional sites and libraries to assist in the development process (e.g., sandbox sites, mock meeting data for tests and demos).
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, and `PROVIDE`.
 *   **DEPLOY**: Libraries and tooling for **shipping** and **operating** deployed solutions (release automation, deployment packaging, CI helpers, infrastructure-as-code). Distinct from **PROVIDE** (runtime service bindings) and **BUILD** (monorepo workspace shell).
-    *   **`deploy-*`**: Reusable deployment **libraries** (e.g. shared CDK constructs, packaging helpers).
-    *   **`deploy-recipe-*`**: **Deployment recipes**—opinionated wiring that composes constructs and packages apps for deployment. Name the recipe after the **deployment pattern** or stack, not a single COMPOSE package slug; one recipe may deploy **several** similar composed apps when they share enough infra and process.
-    *   **`deploy-suite-*`**: **Deployment suites**—meta-packages that orchestrate multiple recipes (scripts, workspace wiring, optional thin CDK entrypoints). The suite name has **no** slice suffix; slices are separate `deploy-recipe-*` packages. See [spec/deploy/](spec/deploy/).
+    *   **`deploy-*`**: Reusable deployment **libraries** (e.g. shared CDK constructs, packaging helpers). Live under **`packages/`**.
+    *   **`deploy-recipe-*`**: **Deployment recipes**—opinionated wiring that composes constructs and packages apps for deployment. Name the recipe after the **deployment pattern** or stack, not a single COMPOSE package slug; one recipe may deploy **several** similar composed apps when they share enough infra and process. Live under **`deploy/recipes/`**.
+    *   **`deploy-suite-*`**: **Deployment suites**—meta-packages that orchestrate multiple recipes (scripts, workspace wiring, optional thin CDK entrypoints). The suite name has **no** slice suffix; slices are separate `deploy-recipe-*` packages. Live under **`deploy/suites/`**. See [spec/deploy/](spec/deploy/).
     *   Can depend on: `UTILS`, `CORE`, `FRAME`, `PROVIDE`, and `COMPOSE`.
 *   **BUILD**: Infrastructure shell (gitmodules, pnpm workspaces, turbo build).
 
@@ -77,3 +77,9 @@ Repositories are organized into groups to enforce modularity and dependencies:
 Dependency management is difficult. Reference solutions keep dependencies small by splitting work into narrower packages.
 
 See [package-directory.md](package-directory.md) and [spec/deploy/](spec/deploy/) for deployment naming, suites, and scripts.
+
+## Repository environment (Varlock)
+
+- **Fragment schemas and examples** live under **[env/](env/)** (e.g. **`env/base/.env.schema`**, **`env/aws/.env.schema`**, **`env/aws/.env.example`**). The **single** root **[`.env.schema`](.env.schema)** imports them with **`@import(./env/<scope>/.env.schema)`**; **[spec/env/README.md](spec/env/README.md)** explains how **`spec/env`** (documentation) differs from **`env/`** (definitions).
+- **Deploy recipes** that add their own keys import the root aggregate—for example **[deploy/recipes/deploy-recipe-mock-data-1/.env.schema](deploy/recipes/deploy-recipe-mock-data-1/.env.schema)** (recipe-local **`MOCK_DATA_*`**).
+- Workflow details: **[spec/env/varlock-and-env.md](spec/env/varlock-and-env.md)**.

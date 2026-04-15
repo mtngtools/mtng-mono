@@ -15,7 +15,9 @@ export default defineConfig({
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
     },
     rollupOptions: {
-      external: [],
+      // Do not bundle the S3 client: a Vite/Rollup bundle breaks the SDK’s default
+      // region and credential resolution (process.env, ~/.aws, SSO, profiles).
+      external: [/^@aws-sdk\//],
     },
     outDir: 'dist',
   },

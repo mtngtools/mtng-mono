@@ -9,6 +9,28 @@ export type S3LogOptions = {
     logBucketAndKey?: boolean
 }
 
+/** Prefer explicit region from env so deploy scripts match Varlock / `.env` regardless of profile defaults. */
+function resolveAwsRegion(): string | undefined {
+    const r = process.env.AWS_REGION?.trim() || process.env.AWS_DEFAULT_REGION?.trim();
+    return r || undefined;
+}
+
+function createDefaultS3Client(): S3Client {
+    const region = resolveAwsRegion();
+    // @aws-sdk/client-s3 is external in our build; default credential chain matches `aws` CLI.
+    return region ? new S3Client({ region }) : new S3Client();
+}
+
+function toPutObjectInput(input: MTPutObjectCommandInput): PutObjectCommandInput {
+    const { logBucketAndKey: _b, logError: _e, logErrorMessageOnly: _m, ...rest } = input;
+    return rest;
+}
+
+function toGetObjectInput(input: MTGetObjectCommandInput): GetObjectCommandInput {
+    const { logBucketAndKey: _b, logError: _e, logErrorMessageOnly: _m, ...rest } = input;
+    return rest;
+}
+
 // export const getS3Client = () => {
 //   if (!s3Client) {
 //     s3Client = new S3Client();
@@ -21,12 +43,12 @@ export type MTPutObjectCommandInput = PutObjectCommandInput & S3LogOptions
 export type MTGetObjectCommandInput = GetObjectCommandInput & S3LogOptions
 
 export const getFileFromS3 = async (input: MTGetObjectCommandInput, s3Client?: S3Client) => {
-    const client = s3Client ?? new S3Client();
+    const client = s3Client ?? createDefaultS3Client();
     if (input.logBucketAndKey) {
         console.log(`Bucket: ${input.Bucket}, Key: ${input.Key}`);
     }
     try {
-        const result = await client.send(new GetObjectCommand(input));
+        const result = await client.send(new GetObjectCommand(toGetObjectInput(input)));
         return returnResult<GetObjectCommandOutput>(result);
     } catch (error) {
         if (input.logError) {
@@ -37,12 +59,12 @@ export const getFileFromS3 = async (input: MTGetObjectCommandInput, s3Client?: S
 }
 
 export const putStringToS3 = async (input: MTPutObjectCommandInput, s3Client?: S3Client) => {
-    const client = s3Client ?? new S3Client();
+    const client = s3Client ?? createDefaultS3Client();
     if (input.logBucketAndKey) {
         console.log(`Bucket: ${input.Bucket}, Key: ${input.Key}`);
     }
     try {
-        await client.send(new PutObjectCommand(input));
+        await client.send(new PutObjectCommand(toPutObjectInput(input)));
         return returnResult<boolean>(true);
     } catch (error) {
         if (input.logError) {
