@@ -2,6 +2,18 @@
 
 This document records **repo-level** choices for mtngTOOLS **DEPLOY** packages: what we call things, how **suites** relate to **recipes**, and how to wire **pnpm** so slices deploy independently or as a group.
 
+## Repository layout
+
+Physical paths in **mtng-mono** (package **names** stay `@mtngtools/deploy-…`; paths are separate):
+
+| Kind | Prefix | Directory |
+| :--- | :--- | :--- |
+| Libraries | **`deploy-*`** | **`packages/`** (e.g. `packages/deploy-aws-cdk/`) |
+| Recipes | **`deploy-recipe-*`** | **`deploy/recipes/`** (e.g. `deploy/recipes/deploy-recipe-aws-nuxt-ref-1a-attend/`) |
+| Suites | **`deploy-suite-*`** | **`deploy/suites/`** (e.g. `deploy/suites/deploy-suite-aws-nuxt-ref-1a/`) |
+
+**`COMPOSE`** apps stay under **`apps/`**; **`deploy/recipes`** and **`deploy/suites`** hold only deploy orchestration packages, not application source trees.
+
 ## Three package kinds
 
 | Prefix | Role |
@@ -52,7 +64,7 @@ A suite **`deploy-suite-aws-nuxt-ref-1a`** (name aligns with the Nuxt ref batch;
 
 ## pnpm: workspace deps on the suite
 
-In **`deploy-suite-aws-nuxt-ref-1a/package.json`** (illustrative):
+In **`deploy/suites/deploy-suite-aws-nuxt-ref-1a/package.json`** (illustrative):
 
 ```json
 {

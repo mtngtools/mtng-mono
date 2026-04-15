@@ -1,0 +1,40 @@
+{
+  "name": "@mtngtools/deploy-recipe-mock-data-1",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Publish develop-mock-data catalog JSON to S3",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run typecheck",
+    "deploy": "tsx src/deploy.ts",
+    "deploy:dryrun": "tsx src/deploy.ts --dry-run",
+    "env:check": "varlock load",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@mtngtools/develop-mock-data": "workspace:^",
+    "@mtngtools/provide-aws": "workspace:^",
+    "varlock": "^0.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.0"
+  },
+  "keywords": [
+    "mtngtools",
+    "deploy",
+    "mock-data",
+    "s3"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "varlock": {
+    "loadPath": ["../../../", "."]
+  }
+}

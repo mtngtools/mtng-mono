@@ -82,6 +82,8 @@ Additional sites and libraries to assist in the development process, such as san
 
 Libraries and tooling for **shipping** and **operating** deployed solutions (release automation, deployment packaging, CI helpers, infrastructure-as-code). Distinct from **PROVIDE** (runtime bindings to external services) and **BUILD** (workspace shell). Can depend on: `UTILS`, `CORE`, `FRAME`, `PROVIDE`, and `COMPOSE`.
 
+**Layout in mtng-mono:** **`deploy-*`** libraries under **`packages/`**; **`deploy-recipe-*`** under **`deploy/recipes/`**; **`deploy-suite-*`** under **`deploy/suites/`**.
+
 Naming (details and examples: [spec/deploy/naming-and-orchestration.md](spec/deploy/naming-and-orchestration.md)):
 
 *   **`deploy-*`**: Reusable deployment **libraries** (constructs, shared stacks, helpers).
@@ -97,6 +99,7 @@ Naming (details and examples: [spec/deploy/naming-and-orchestration.md](spec/dep
 
 | Package | Description | Repo | Status |
 | :--- | :--- | :--- | :--- |
+| `deploy-recipe-mock-data-1` | Publish mock meeting JSON from `develop-mock-data` named recipes to S3 (`MOCK_DATA_S3_BUCKET_NAME`, `MOCK_DATA_S3_BUCKET_KEY_PREFIX`). [README](deploy/recipes/deploy-recipe-mock-data-1/README.md). | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 
 ### `deploy-suite-*` (suites)
 
