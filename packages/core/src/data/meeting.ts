@@ -1,5 +1,5 @@
-import { Simplify } from "@mtngtools/utils-core";
-import { BaseEnv } from "../app-env";
+import type { Simplify } from "@mtngtools/utils-core";
+import type { BaseEnv } from "../app-env";
 
 export type TzConfig = {
     tzName: string,
@@ -11,12 +11,17 @@ export type MeetingBase = {
     mtDir: string,
 }
 
-export type Meeting = MeetingBase & {
+export type Meeting = Simplify<MeetingBase & {
     mtSlug?: string,
     mtName: string,
-} & TzConfig;
+} & TzConfig>;
 
-export type BaseEnvMeeting = BaseEnv & MeetingBase;
+export type MeetingDataVersion = {
+    currentDataVersion?: string;
+    previewDataVersion?: string;
+}
+
+export type BaseEnvMeeting = Simplify<BaseEnv & MeetingBase>;
 
 export type RoomSource = {
     rmSourceId: string,
@@ -35,25 +40,31 @@ export type RoomBase = Simplify<HasRoomId & {
     rmMetadata?: Record<string, unknown>,
 }>;
 
-export type Room = RoomBase & {
+export type Room = Simplify<RoomBase & {
     rmShortName?: string,
     rmVenue?: string,
     rmVenueSection?: string,
     isMain?: boolean,
-} & Partial<RoomSource>
+} & Partial<RoomSource>>;
+
+// Unix timestamp in milliseconds, matching JS Date and common date-library defaults.
+export type UnixTimestampMs = number;
 
 export type SessionBase = Simplify<{
     ssId: string,
     ssSlug?: string,
     ssTitle: string,
-    ssStart: number,
-    ssEnd: number,
+    ssStart: UnixTimestampMs,
+    ssEnd: UnixTimestampMs,
     ssStartStr?: string,
     ssEndStr?: string,
     qaLink?: string,
     ssType?: string,
     ssTags?: string[],
+    ssSecondaryTags?: string[],
     ssMetadata?: Record<string, unknown>,
+    ssSpeakerNames?: string[], // optional array of all speaker names for session summaries
+    ssModeratorNames?: string[], // optional array of all moderator names for session summaries
 } & Partial<HasRoomId>>;
 
 export type PresentationBase = {
@@ -63,12 +74,13 @@ export type PresentationBase = {
     prSlug?: string,
     prTitle: string,
     prAltTitle?: string,
-    prStart: number,
-    prEnd: number,
+    prStart: UnixTimestampMs,
+    prEnd: UnixTimestampMs,
     prStartStr?: string,
     prEndStr?: string,
     prType?: string,
     prTags?: string[],
+    prSecondaryTags?: string[],
     prMetadata?: Record<string, unknown>,
 }
 
@@ -88,32 +100,67 @@ export type SpeakerBase = {
     spMetadata?: Record<string, unknown>,
 }
 
-export type PresentationFull = PresentationBase & {
-    prSpeakers: SpeakerBase[];
-}
+export type PresentationFull<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationBase = PresentationBase,
+> = Simplify<PR & {
+    prSpeakers: Simplify<SP>[];
+    prModerators?: Simplify<SP>[];
+}>;
 
-export type SessionWithPres = SessionBase & {
-    ssPresentations: PresentationFull[],
-    ssModerators?: SpeakerBase[];
-}
+export type SessionChildrenOnly<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationFull<SP> = PresentationFull<SP>,
+> = Simplify<{
+    ssPresentations: Simplify<PR>[];
+    ssModerators?: Simplify<SP>[] | string[]; // allow for string array of moderator IDs to avoid unnecessary duplication
+}>;
 
-export type SessionWithRoom = Simplify<SessionBase & Room>
+export type SessionWithPres<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationFull<SP> = PresentationFull<SP>,
+    SS extends SessionBase = SessionBase,
+> = Simplify<SS & SessionChildrenOnly<SP, PR>>;
 
-export type SessionWithRoomAndPres = SessionBase & Room & { ssPresentations: PresentationFull[] }
+export type SessionWithRoom<
+    SS extends SessionBase = SessionBase,
+    RM extends Room = Room,
+> = Simplify<SS & RM>;
 
-export type ResolvedSpeaker = SpeakerBase & Required<Pick<SpeakerBase, "spSlug">>;
+export type SessionWithRoomAndPres<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationFull<SP> = PresentationFull<SP>,
+    SS extends SessionWithPres<SP, PR> = SessionWithPres<SP, PR>,
+    RM extends Room = Room,
+> = Simplify<SS & RM>
 
-export type ResolvedPresentation = PresentationBase & Required<Pick<PresentationBase, "prSlug" | "prStartStr" | "prEndStr">> & { 
-    prSpeakers: ResolvedSpeaker[];
-};
+export type ResolvedSpeaker<
+    SP extends SpeakerBase = SpeakerBase,
+> = Simplify<SP & Required<Pick<SP, "spSlug">>>;
 
-export type ResolvedSession = SessionBase & Required<Pick<SessionBase, "ssSlug" | "ssStartStr" | "ssEndStr">> & {
-    ssPresentations: ResolvedPresentation[];
-    ssModerators: ResolvedSpeaker[];
-};
+export type ResolvedPresentation<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationFull<SP> = PresentationFull<SP>
+> = Simplify<PR & Required<Pick<PR, "prSlug" | "prStartStr" | "prEndStr">> & {
+    prSpeakers: ResolvedSpeaker<SP>[];
+    prModerators: ResolvedSpeaker<SP>[] | string[];
+}>;
 
-export type ResolvedRoom = Room & Required<Pick<Room, "rmSlug" | "rmName" | "rmFullName">>;
+export type ResolvedSession<
+    SP extends SpeakerBase = SpeakerBase,
+    PR extends PresentationFull<SP> = PresentationFull<SP>,
+    SS extends SessionWithPres<SP, PR> = SessionWithPres<SP, PR>
+> = Simplify<SS & Required<Pick<SS, "ssSlug" | "ssStartStr" | "ssEndStr">> & {
+    ssPresentations: ResolvedPresentation<SP, PR>[];
+    ssModerators: ResolvedSpeaker<SP>[]; // if was string[] of IDs, resolved to ResolvedSpeaker; 
+}>;
 
-export type ResolvedMeeting = Required<Meeting>;
+export type ResolvedRoom<
+    RM extends Room = Room,
+> = Simplify<RM & Required<Pick<RM, "rmSlug" | "rmName" | "rmFullName">>>;
+
+export type ResolvedMeeting<
+    MT extends Meeting = Meeting,
+> = Simplify<MT & Required<Pick<MT, "mtSlug" | "mtName">>>;
 
 

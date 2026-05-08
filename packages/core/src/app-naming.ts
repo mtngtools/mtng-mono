@@ -1,3 +1,4 @@
+import { FullEnv, resolveEnv } from "./app-env";
 
 
 export const NAME_GENERATOR_DEFAULT = "default" as const;
@@ -18,9 +19,9 @@ export type NameGeneratorParams<I extends FullEnv=FullEnv, O extends GeneratedNa
 export const dashDelimitedGenerateName = <I extends FullEnv = FullEnv>(env: I): GeneratedName => {
     const resolvedEnv = resolveEnv(env);
     const { orgDir, opEnv, solutionDomain, applRole, applVariant, isSolutionDefault, isApplVariantPrimary, isApplRoleDefault } = resolvedEnv;
-    const applVariantPart = isApplVariantPrimary ? "" : `-${applVariant}`;
-    const applRolePart = isApplRoleDefault ? "" : `-${applRole}`;
-    const solutionDomainPart = isSolutionDefault ? "" : `-${solutionDomain}`;
+    const applVariantPart = isApplVariantPrimary() ? "" : `-${applVariant}`;
+    const applRolePart = isApplRoleDefault() ? "" : `-${applRole}`;
+    const solutionDomainPart = isSolutionDefault() ? "" : `-${solutionDomain}`;
     return { resourceName: `${orgDir}-${opEnv}${applVariantPart}${applRolePart}${solutionDomainPart}` };
 }    
 
