@@ -133,9 +133,11 @@ export const STORAGE_STREAM = "stream" as const;
 export const STORAGE_DOWNLOAD = "download" as const;
 export const STORAGE_RECORD = "record" as const;
 
+export type StorageRole = typeof STORAGE_DEFAULT | typeof STORAGE_APP_STATIC | typeof STORAGE_RESOURCE | typeof STORAGE_STATE | typeof STORAGE_DATA
+    | typeof STORAGE_STREAM | typeof STORAGE_DOWNLOAD | typeof STORAGE_RECORD | string;
+
 export type HasStorageRole = {
-    storageRole: typeof STORAGE_DEFAULT | typeof STORAGE_APP_STATIC | typeof STORAGE_RESOURCE | typeof STORAGE_STATE | typeof STORAGE_DATA
-    | typeof STORAGE_STREAM | typeof STORAGE_DOWNLOAD | typeof STORAGE_RECORD | string,
+    storageRole: StorageRole,
 }
 
 export type StorageEnv = BaseEnv
@@ -177,4 +179,39 @@ export type HasMessage = {
 
 export type HasCreatedUpdated = {
     updatedAt: string,
+}
+
+export const STORAGE_DEFAULT = "default" as const;
+export const STORAGE_APP_STATIC = "static" as const;
+export const STORAGE_RESOURCE = "resource" as const;
+export const STORAGE_STATE = "state" as const;
+export const STORAGE_DATA = "data" as const;
+export const STORAGE_STREAM = "stream" as const;
+export const STORAGE_DOWNLOAD = "download" as const;
+export const STORAGE_RECORD = "record" as const;
+
+export type HasStorageRole = {
+    storageRole: typeof STORAGE_DEFAULT | typeof STORAGE_APP_STATIC | typeof STORAGE_RESOURCE | typeof STORAGE_STATE | typeof STORAGE_DATA
+    | typeof STORAGE_STREAM | typeof STORAGE_DOWNLOAD | typeof STORAGE_RECORD | string,
+}
+
+export type StorageEnv = BaseEnv
+    & Partial<HasStorageRole>
+
+export type ResolvedStorageEnv = StorageEnv & Required<Pick<StorageEnv, "storageRole">>;
+
+export const resolveStorageEnv = (env: StorageEnv) => {
+    const storageRole = env.storageRole ?? STORAGE_DEFAULT;
+    const isStorageRoleDefault = storageRole === STORAGE_DEFAULT;
+    const resolvedEnv = resolveEnv(env);
+    const envOnly = {
+        ...resolvedEnv.envOnly,
+        storageRole,
+    } satisfies ResolvedStorageEnv;
+    return {
+        ...resolvedEnv,
+        storageRole,
+        envOnly,
+        isStorageRoleDefault,
+    };
 }
