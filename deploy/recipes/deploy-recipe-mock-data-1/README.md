@@ -17,7 +17,7 @@ This README is the **canonical spec** for this recipe; it lives next to the pack
 
 ## Configuration (environment)
 
-**Repo convention:** [spec/env/varlock-and-env.md](../../../spec/env/varlock-and-env.md) describes the root aggregate **`.env.schema`**, **`env/<scope>/`** fragments ([`env/aws/.env.example`](../../../env/aws/.env.example), etc.), package **`@import`**, and **`package.json` → `varlock.loadPath`**. Set **`AWS_REGION`** (and optional static **`AWS_*`** keys) **once** in the **mtng-mono** repository root **`.env`** (gitignored), using lines merged from **`env/<scope>/.env.example`**; this package’s **[`.env.schema`](./.env.schema)** **imports** the root aggregate and adds **`MOCK_DATA_*`** only.
+**Repo convention:** [spec/env/README.md](../../../spec/env/README.md) — Varlock strategy (target **`@mtngtools/env-*`** + **`workspace:*`**); **today** this recipe still **`@import`s** the **root aggregate** **`.env.schema`** and adds **`MOCK_DATA_*`** only. Set **`AWS_REGION`** (and optional **`AWS_*`**) in the repo root **`.env`** from **`env/<scope>/.env.example`** lines where applicable.
 
 ### Required (this package)
 
@@ -30,7 +30,7 @@ Put these in **this directory’s** **`.env`** (gitignored) or alongside root va
 
 ### Optional shared **`AWS_*`** (repo root)
 
-Declared in **[mtng-mono `/.env.schema`](../../../.env.schema)** (which imports **[`env/aws/.env.schema`](../../../env/aws/.env.schema)** and **[`env/base/.env.schema`](../../../env/base/.env.schema)**) and documented in **[spec/env/README.md](../../../spec/env/README.md)** / [varlock-and-env.md](../../../spec/env/varlock-and-env.md). **`@mtngtools/provide-aws`** depends on **`@aws-sdk/client-s3`** as a normal **Node** dependency (not bundled into **`dist`**) so the SDK’s **default credential chain** matches the **`aws` CLI** (`~/.aws`, SSO, profiles, **`AWS_*`** env vars). The deploy script still sets **`region`** from **`process.env.AWS_REGION`** / **`AWS_DEFAULT_REGION`** when present so behavior matches Varlock. Set **`AWS_REGION`** in the **root** **`.env`** for local runs. Do **not** commit secrets.
+Declared in **[mtng-mono `/.env.schema`](../../../.env.schema)** (which imports **[`env/aws/.env.schema`](../../../env/aws/.env.schema)** and **[`env/base/.env.schema`](../../../env/base/.env.schema)**) and summarized in **[spec/env/README.md](../../../spec/env/README.md)**. **`@mtngtools/provide-aws`** depends on **`@aws-sdk/client-s3`** as a normal **Node** dependency (not bundled into **`dist`**) so the SDK’s **default credential chain** matches the **`aws` CLI** (`~/.aws`, SSO, profiles, **`AWS_*`** env vars). The deploy script still sets **`region`** from **`process.env.AWS_REGION`** / **`AWS_DEFAULT_REGION`** when present so behavior matches Varlock. Set **`AWS_REGION`** in the **root** **`.env`** for local runs. Do **not** commit secrets.
 
 **Varlock:** **`import "varlock/auto-load"`** in **`src/deploy.ts`** (requires **Node ≥ 22**). Validate with **`pnpm run env:check`**. **`process.env`** after load is what **`loadDeployConfig`** and the AWS SDK read.
 
@@ -91,7 +91,7 @@ Dev-only: **TypeScript**, **tsx**, **Vitest** (unit tests for helpers). **Runtim
 ## Implementation notes
 
 - **Entrypoint:** The publish pipeline lives in **`src/deploy.ts`**; **`pnpm run deploy`** runs **`tsx src/deploy.ts`**; **`pnpm run deploy:dryrun`** runs **`tsx src/deploy.ts --dry-run`** (no separate compile step for this package). **`scripts.env:check`** runs **`varlock load`** (validate env from this package directory).
-- **Varlock:** **`import "varlock/auto-load"`** must be the **first** import side effect so **`process.env`** is populated before **`loadDeployConfig()`**. **`package.json` → `varlock.loadPath`** is **`["../../../", "."]`** — see [spec/env/varlock-and-env.md](../../../spec/env/varlock-and-env.md).
+- **Varlock:** **`import "varlock/auto-load"`** must be the **first** import side effect so **`process.env`** is populated before **`loadDeployConfig()`**. **`package.json` → `varlock.loadPath`** is **`["../../../", "."]`** (legacy; target **`["."]`** + **`@mtngtools/env-*`** — [spec/env/README.md](../../../spec/env/README.md)).
 - **Dry run:** Branch on **`process.argv.includes("--dry-run")`** in **`loadDeployConfig()`**. In dry-run mode, **skip** **`putStringToS3`** entirely; **do** materialize JSON locally. Shared helper **`putOrLogDryRun`** prints either **Would upload** or performs **`putStringToS3`** then **Uploaded** with the same URI/size line shape. **`logBucketAndKey`** is **`false`** on **`putStringToS3`** because the script logs URIs itself.
 - **Config:** **`loadDeployConfig()`** reads **`MOCK_DATA_*`** only (not **`AWS_*`**—those are only for the SDK and logging). **Validate** both **`MOCK_DATA_*`** are non-empty after trim; **reject** prefix that is empty after **`normalizeKeyPrefix`**; **exit 1** on validation failure.
 - **Object keys:** **`{normalizedPrefix}/{recipeId}/{filename}`** via **`normalizeKeyPrefix`** in **`prefix.ts`** (trim slashes, collapse **`//`**). Filenames: **`mock-meeting.json`**, **`recipe.json`**.
@@ -109,7 +109,7 @@ Dev-only: **TypeScript**, **tsx**, **Vitest** (unit tests for helpers). **Runtim
 
 ## Related documentation
 
-- [Environment and Varlock (mtng-mono)](../../../spec/env/varlock-and-env.md) — root **`.env.schema`**, **`@import`**, **`loadPath`**, header rules.
+- [Environment / Varlock](../../../spec/env/README.md) — **`@mtngtools/env-*`**, **`loadPath`**, **`@import`** rules.
 - [develop-mock-data specifications](../../../packages/develop-mock-data/spec/README.md) — recipe model and contracts.
 - [`provide-aws` S3 helpers](../../../packages/provide-aws/src/s3.ts) — `putStringToS3` and types.
 - [Varlock — JavaScript / Node.js](https://varlock.dev/integrations/javascript/) — `auto-load`, CLI (`varlock load`, `varlock run`).

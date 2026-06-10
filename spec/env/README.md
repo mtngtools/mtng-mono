@@ -1,18 +1,75 @@
-# Environment specifications (requirements)
+# Environment (`spec/env`)
 
-This directory holds **specifications** for how **mtng-mono** manages environment variables and tooling (Varlock, schemas, examples).
+**[Varlock](https://varlock.dev/)** + **`@mtngtools/core`** **`FullEnv`**. **`spec/`** is contributor docs only—published **`@mtngtools/*`** **`README`** + **`exports`** are what downstream apps use.
 
-- **[varlock-and-env.md](./varlock-and-env.md)** — Varlock usage: single root **`.env.schema`**, **`@import`**, **`loadPath`**, package composition.
+---
 
-**Fragment schemas and examples** (source of truth for variable lists) live in the repo root **`env/`** directory—not here:
+## NPM vs monorepo
 
-| Location | Role |
+| Audience | Use |
 | :--- | :--- |
-| **[env/](../../env/)** | One directory per scope (e.g. **`env/base/`**, **`env/aws/`**), each with **`.env.schema`** + **`.env.example`**. Root **`.env.schema`** uses **`@import(./env/<scope>/.env.schema)`** (leading **`./`** required by Varlock). **`spec/env`** documents behavior only. |
+| Consumers | **`@mtngtools/core`** (**`FullEnv`**, **`resolveEnv`**); **`@mtngtools/env-*`** for **`.env.schema`** / **`.env.example`**. **`dependencies`** / **`workspace:*`** — never **`spec/`** or **`file:`** into **`mtng-mono`**. |
+| Contributors | This file + **`packages/*/spec`**; recipes live under **`deploy/recipes/`**. |
 
-Future provider-specific scopes should add **`env/<provider>/.env.schema`** + **`env/<provider>/.env.example`**, then **`@import`** them from the single root **`.env.schema`**.
+---
 
-## Related
+## Varlock strategy
 
-- [Application environment (`app-env`)](../../packages/core/spec/app-env.md) — **`MTNG_OP_ENV`**, **`MTNG_ORG_DIR`**, naming dimensions.
-- [Deploy recipe mock-data env schema](../../deploy/recipes/deploy-recipe-mock-data-1/.env.schema) — recipe-local keys importing the root aggregate.
+1. **Schemas ship in packages** — e.g. **`@mtngtools/env-base`**, **`@mtngtools/env-aws`** (illustrative). **`package.json` → `files`** includes **`.env.schema`** + **`.env.example`**.
+2. **`workspace:*` (monorepo)** — Recipes/libraries declare **`"@mtngtools/env-base": "workspace:*"`** so **`pnpm install`** matches **`npm`** **`node_modules`** layout for **`@mtngtools/*`**.
+3. **Forbidden** in hand-maintained **`.env.schema`** / Varlock config: **`@import(../../../.env.schema)`**, **`@import`** into repo **`env/`**, **`loadPath`** walking **`../`** to mtng-mono root **`.env`**. **Exception:** repo **automation only** (`require.resolve`, **`fs`**, release flatten scripts)—not normal **`varlock load`**.
+4. **`loadPath`** — default **`["."]`** only: **`.env`** beside that package’s **`.env.schema`** (run **`pnpm exec varlock load`** from **recipe `cwd`**; **`pnpm --filter`** keeps **`cwd`** on the package).
+
+**Compose schemas:**
+
+- **Default (expected implementation)** — **CI/automation** resolves **`@mtngtools/env-*`** schema files (e.g. **`require.resolve`**) and **writes one flattened `.env.schema`** next to the recipe (and publishes it). **No `@import`** of **`./node_modules/...`**. Same tarball works in monorepo and **`npm`** installs; avoids **`pnpm`** hoisting issues.
+
+- **Alternative (only when Default is impractical)** — **`@import(./node_modules/@mtngtools/env-base/.env.schema)`** **only when Default is impractical** (e.g. no flatten step in place yet, short-lived local experimentation). **`@import`** lines stay in the Varlock **`header`** (before **`---`**); recipe-only keys follow **`---`**. Do **not** rely on this for published **`deploy-recipe-*`** packages—use **Default**.
+
+```json
+{
+  "dependencies": {
+    "@mtngtools/env-base": "workspace:*",
+    "@mtngtools/env-aws": "workspace:*",
+    "@mtngtools/core": "workspace:*"
+  },
+  "varlock": { "loadPath": ["."] }
+}
+```
+
+**TS entry:** **`import "varlock/auto-load"`** first; then **`process.env`** + **`resolveEnv`** from **`@mtngtools/core`**.
+
+**Avoid:** **`../../../`** schema/import, **`loadPath: ["../../../", "."]`**, Varlock **`@import`** sources rooted at hand-maintained **`env/`** — migrate to **`@mtngtools/env-*`** (root **`env/`** only via automation mirrors).
+
+---
+
+## Illustrative layout
+
+```
+packages/env-base/          ← .env.schema, .env.example, package.json (files field)
+deploy/recipes/my-recipe/    ← depends workspace:* on env-*; flattened .env.schema (Default); .env gitignored
+```
+
+Third-party: same **`dependencies`** with semver instead of **`workspace:*`**; recipe **`README`** explains **`deploy/`** folder + **`loadPath: ["."]`**.
+
+---
+
+## Legacy **`env/`** at repo root
+
+**`env/base`**, **`env/aws`**, root **`.env.schema`** may remain **during migration** or as **generated** output only—not Varlock **`@import`** targets from recipes long-term.
+
+---
+
+## Roadmap
+
+Typed loaders (**`@mtngtools/*`**) map validated env → **`FullEnv`**; **`deploy-aws-cdk-builder`** / **defaults** use **`workspace:*`**/semver only.
+
+**Backlog:** **`MTNG_*` → `FullEnv`** tables on **`core`** / **`env-*`** **`README`**; secrets prefix-only in schema ([CDK secrets](../deploy/builder/cdk/secrets/README.md)); **`varlock load`** in CI; [CDK env backlog](../deploy/builder/cdk/env-and-varlock.md).
+
+---
+
+## Links
+
+- [Varlock imports](https://varlock.dev/guides/import/) · [CLI](https://varlock.dev/reference/cli-commands/)
+- [`app-env`](../../packages/core/spec/app-env.md)
+- [Deploy README](../deploy/README.md) · [CDK builder env](../deploy/builder/cdk/README.md#environment-and-naming-contract)
