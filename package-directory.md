@@ -23,7 +23,6 @@ Pure business logic, types, and interfaces specific to the mtngTOOLS domain. Can
 
 | Package | Description | Repo | Status |
 | :--- | :--- | :--- | :--- |
-| `core-types` | TypeScript definitions and interfaces. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | planned |
 | `core` | Main core library. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 | `core-admin` | Core types, constants and functions shared across admin mtngTOOLS packages. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | alpha |
 | `core-plus` | Extended core functionality. | [mtng-mono](https://github.com/mtngtools/mtng-mono) | planned |

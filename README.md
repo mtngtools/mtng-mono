@@ -55,6 +55,7 @@ Repositories are organized into groups to enforce modularity and dependencies:
     *   External dependencies limited to types and interfaces.
 *   **CORE** (`core`, `core-types`, `core-plus`)
     *   Pure business logic, types, and interfaces specific to the conference and meeting domain.
+    *   `provider/[PROVIDER_NAME]`: Provider-specific types copied in. Used to allow unique benefits of a provider to be leveraged in the CORE and FRAME packages. NO dependencies on provider's packages allowed, requiring some form of dependency injection in a composed app for full implementation. Should be used sparingly only where a generic interface would not suffice. 
     *   Can depend on: `UTILS`.
 *   **FRAME** (`frame-vue`, `frame-nuxt`)
     *   Implementation libraries using a structured framework (such as Vue.js or Nuxt).
@@ -80,6 +81,5 @@ See [package-directory.md](package-directory.md) and [spec/deploy/](spec/deploy/
 
 ## Repository environment (Varlock)
 
-- **Fragment schemas and examples** live under **[env/](env/)** (e.g. **`env/base/.env.schema`**, **`env/aws/.env.schema`**, **`env/aws/.env.example`**). The **single** root **[`.env.schema`](.env.schema)** imports them with **`@import(./env/<scope>/.env.schema)`**; **[spec/env/README.md](spec/env/README.md)** explains how **`spec/env`** (documentation) differs from **`env/`** (definitions).
-- **Deploy recipes** that add their own keys import the root aggregate—for example **[deploy/recipes/deploy-recipe-mock-data-1/.env.schema](deploy/recipes/deploy-recipe-mock-data-1/.env.schema)** (recipe-local **`MOCK_DATA_*`**).
-- Workflow details: **[spec/env/varlock-and-env.md](spec/env/varlock-and-env.md)**.
+- **Definitions:** fragment **`.env.schema`** / **`.env.example`** under **`env/`** and root **`.env.schema`** aggregate ([details](env/)); **[spec/env/README.md](spec/env/README.md)** — Varlock (**target:** **`@mtngtools/env-*`**, **`workspace:*`**, **`loadPath: ["."]`**); legacy **`env/`** remains transitional.
+- **Recipes** extend shared keys via package **`.env.schema`** — e.g. **[deploy/recipes/deploy-recipe-mock-data-1/](deploy/recipes/deploy-recipe-mock-data-1/)** (**`MOCK_DATA_*`**).

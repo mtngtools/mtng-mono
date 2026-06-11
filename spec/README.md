@@ -1,11 +1,30 @@
 # Specifications
 
-This directory is the repo-level specification entry point. Detailed specs and architecture decisions live here and in each package’s `spec/` directory.
+Repo-level spec entry point. Package `spec/` dirs hold app-specific detail. Specification may live at the packages level, but when implementation spans many packages, the high-level spec lives here.
 
-- **Environment (Varlock):** See [env/README.md](./env/README.md) for the **`env/`** fragment layout and [env/varlock-and-env.md](./env/varlock-and-env.md) for **`.env.schema`** aggregation, package **`@import`**, and **`loadPath`**.
-- **Code organization**: See the [mtngTOOLS package directory](../package-directory.md) and [overview](../README.md) for layers (UTILS, CORE, FRAME, PROVIDE, COMPOSE, DEVELOP, DEPLOY, BUILD) and dependency rules.
-- **Deployment**: See [deploy/](deploy/) for **`deploy-suite-*`**, **`deploy-recipe-*`**, naming, shared vs app slices, and pnpm script patterns.
-- **Submodules**: See [SUBMODULES.md](../SUBMODULES.md) for submodules (e.g. `sub/hls`).
-- **Application environment** (`core`): See [packages/core/spec/app-env.md](../packages/core/spec/app-env.md) for typed env used to name and orchestrate apps and resources (dev through prod).
-- **Data Import**: See [data/session-data-import.md](./data/session-data-import.md) for requirements around mocking, importing, and transforming session and room data.
-- New features should not be implemented until specifications are updated and approved.
+## Cross-cutting concerns
+
+- **auth** — identity, sessions, access control, auth-related APIs
+- **data** — schemas, import/transform, fixtures, storage boundaries
+- **deploy** — recipes, naming, orchestration, shared vs app slices
+- **env** — Varlock, `.env` fragments, secrets, load paths, drives [core:app-env](../packages/core/spec/app-env.md) to name and 
+orchestrate apps and resources (dev through prod)
+- **style** — UI/branding tokens, code and component conventions
+
+## Patterns
+
+Reusable approaches to common problems: [patterns/README.md](./patterns/README.md) (starts with [timeline & steps](./patterns/timeline-steps.md)).
+
+## Framework
+
+Where FRAME code is split across Vue, Nuxt, and Nitro surfaces—with standards for for each: [framework/README.md](./framework/README.md).
+
+## Code organization
+
+See the [mtngTOOLS package directory](../package-directory.md) and [overview](../README.md) for layers (UTILS, CORE, FRAME, 
+PROVIDE, COMPOSE, DEVELOP, DEPLOY, BUILD) and dependency rules.
+
+- **Data Import**: See [data/session-data-import.md](./data/session-data-import.md) for requirements around mocking, importing, and transforming 
+session and room data.
+
+See also: [mtngTOOLS package directory](../package-directory.md), [repo overview](../README.md), [SUBMODULES](../SUBMODULES.md).
