@@ -133,9 +133,11 @@ export const STORAGE_STREAM = "stream" as const;
 export const STORAGE_DOWNLOAD = "download" as const;
 export const STORAGE_RECORD = "record" as const;
 
+export type StorageRole = typeof STORAGE_DEFAULT | typeof STORAGE_APP_STATIC | typeof STORAGE_RESOURCE | typeof STORAGE_STATE | typeof STORAGE_DATA
+    | typeof STORAGE_STREAM | typeof STORAGE_DOWNLOAD | typeof STORAGE_RECORD | string;
+
 export type HasStorageRole = {
-    storageRole: typeof STORAGE_DEFAULT | typeof STORAGE_APP_STATIC | typeof STORAGE_RESOURCE | typeof STORAGE_STATE | typeof STORAGE_DATA
-    | typeof STORAGE_STREAM | typeof STORAGE_DOWNLOAD | typeof STORAGE_RECORD | string,
+    storageRole: StorageRole,
 }
 
 export type StorageEnv = BaseEnv
