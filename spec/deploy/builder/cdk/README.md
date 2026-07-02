@@ -51,7 +51,8 @@ Detailed builder specs are split by concern:
 - **Intent registration**: `addXxxx` methods register resource definitions (props, metadata, resource extension key, environment, and dependencies) rather than creating live constructs immediately.
 - **Build phase**: A mandatory `.build(scope)` step iterates through registered definitions and instantiates constructs inside the provided CDK scope.
 - **Builder stack**: A specialized `Stack` can receive a builder and trigger `.build()` inside its constructor, but deploy recipes may also call the builder directly when that is clearer.
-- **Lifecycle hooks**: Support pre-build validation (for circular dependencies, missing refs, invalid environment dimensions) and post-build actions (tags, aspects, outputs, or cross-stack exports).
+- **Lifecycle hooks**: Support pre-build validation (for circular dependencies, missing refs, invalid environment dimensions). The builder prefers failing fast on validation errors. Post-build actions include tags and aspects.
+- **Ordering**: Execution and rendering strictly follow the registration order defined in the builder.
 
 ## Builder Options and Extensions
 
@@ -151,14 +152,24 @@ builder.addStack("app", { stackName: process.env.CDK_APP_STACK_NAME! }, (s) =>
 
 This keeps stack boundaries explicit without adding per-resource stack ids.
 
+## Cross-Stack References
+
+- **Avoid CfnOutputs**: The builder explicitly avoids `CfnOutput` exports/imports to prevent painful tight coupling.
+- **Name Lookup Only**: The *only* supported cross-stack strategy is lookup via deterministic physical name (e.g., Bucket Name).
+- **CDK Primitives**: The builder itself does not perform these searches directly; it uses standard CDK primitives (e.g., `Bucket.fromBucketName`, `fromLookupByName`) to lookup resources the same way native CDK code would.
+
 ## Opinionated Props Factories
 
-Dedicated `addXxxx` methods should not require callers to pass full CDK props for normal cases. When props are omitted, the resource extension should call a matching props factory such as `createBucketProps`, `createFunctionProps`, or `createTableProps` to build opinionated defaults from the resource key, `FullEnv` / resolved env, naming helpers, tags, and any resource-specific metadata.
+Dedicated `addXxxx` methods should not require callers to pass full CDK props for normal cases. When props are omitted, the resource extension should call a matching props factory to build opinionated defaults from the resource key, `FullEnv` / resolved env, naming helpers, tags, and any resource-specific metadata.
+
+Props factories should use a versioning pattern (e.g., `createBucketPropsLatest` as the default, and immutable versioned variants like `createBucketProps2026`).
 
 Resource default props rules:
 
 - **Spec location**: The default props factory contract for a resource should be specified in the same resource spec file under [`./resources/`](./resources/README.md).
 - **Typing shape**: `createXxxxProps` should return a partial-typed shape aligned to the CDK props type for that resource (for example, `Partial<BucketProps>`, `Partial<FunctionProps>`, `Partial<DistributionProps>`), with the resource extension responsible for final normalization/validation before construct creation.
+- **Removal Policies**: Props factories use `FullEnv` to vary defaults. Stateful resources default to `RETAIN` in production and `DESTROY` in non-prod. A generic `RetainStorage` override should be available to retain resources in non-prod. Overrides are allowed at the builder, stack, and resource level.
+- **Encryption**: Default to AWS managed keys (e.g., SSE-S3) across all resources unless explicitly overridden.
 
 ```ts
 builder.addStack("app", { stackName: process.env.CDK_APP_STACK_NAME! }, (s) =>
@@ -206,6 +217,15 @@ const { resourceName } = resolveNameGenerator({})(env);
 
 Deploy packages may provide AWS/CDK-specific naming helpers when resource families need additional segments such as `storageRole`, stack role, or meeting-scoped ids, but those helpers should still start from the `core` environment model.
 
+## Domain Names and Certificates
+
+Managing domain names and TLS certificates requires a consistent, convention-based approach to avoid manual overhead and broken links.
+
+- **Domain Name Generation**: Domain names should always be derived from a central generator function, e.g., `createDomainName(env)`, with the default implementation living in the `core` package alongside other naming conventions.
+- **Override Scope**: The `createDomainName` function can be overridden at the builder, stack, or individual construct/resource level.
+- **Props Factory Integration**: For resources that expose domains (such as CloudFront distributions or API Gateways), domain names should be automatically created and assigned within the builder's default props factories using the domain generator.
+- **Certificate Strategy**: Because validating certificates can be a manual and annoying process (often requiring DNS validation), application stacks should generally avoid requesting new certificates. Instead, the recommended approach is a separate core stack that provisions a **wildcard certificate**, which is then consumed by app stacks via cross-stack reference (e.g., `addCrossStackReferenceByCertificateName`).
+
 ## Tagging (auto-tagging contract)
 
 By default, resources created through the builder SHOULD be tagged with the environment dimensions that contributed to their identity so they are discoverable and traceable across stacks and accounts.
@@ -236,6 +256,7 @@ Full normative detail: [secrets/README.md](./secrets/README.md).
 
 - **Dedicated methods**: Start with first-class add methods for common CDK resources: `addBucket`, `addTable`, `addFunction`, `addQueue`, `addTopic`, `addHttpApi`, `addEventRule`, `addStateMachine`, `addDistribution`, and `addParameter`.
 - **Custom resources**: Always provide an `addCustom<ResourceType>` path so library users can register resources the builder package does not know about yet.
+- **Raw Construct Escape Hatch**: Provide an `addConstruct` path so users can drop down into raw CDK code during the build phase. This allows users to instantiate a construct, lookup other builder resources via `context`, and return the construct for builder registration.
 - **Typed custom registration**: Custom resources should still receive builder benefits: local registry keys, metadata, dependency ordering, naming hooks, validation, and typed references usable by other builder method calls.
 - **Resource extension overrides**: Dedicated resource methods call resource extensions supplied through `options.extensions.resources`. The builder package declares the expected resource extension interface; default construct and props implementations come from the separate defaults package.
 - **Optional props**: Resource props are optional for the common path. If omitted, the selected resource extension should call the matching `createXxxxProps` factory before creating the CDK construct.
@@ -253,6 +274,7 @@ The dedicated methods are convenience APIs for popular constructs, not a closed 
 - **Prefer CDK-native composition first**: When AWS CDK already models a relationship through resource constructor props (for example, passing origins, certificate, and domain config into a CloudFront distribution), recipes should prefer that constructor-prop composition path before introducing separate relationship calls.
 - **No bare links**: Avoid a generic `link(source, target)` as the primary API because it does not say what relationship is being created. Use explicit verbs for built-ins and a named custom path for unusual relationships.
 - **Custom relationships**: Always provide an `addCustomRelationship` path so users can register relationship behavior the defaults package does not know about yet.
+- **Raw Wiring Escape Hatch**: Provide an `addWiring` (or `onBuild`) path so users can execute arbitrary code during the build phase to glue things together without having to define a full relationship extension or register a new construct.
 - **Cross-stack connectivity**: Handle CloudFormation exports/imports, stack dependencies, and SSM/parameter references when a link crosses stack or recipe boundaries.
 - **Validation**: Relationship extensions should fail early when required source/target resource kinds, environment dimensions, or generated outputs are missing.
 
@@ -359,6 +381,25 @@ Deploy recipes may hardcode identity dimensions that define *what* is being depl
 ## Desired Developer Experience
 
 The developer defines an infrastructure blueprint through the builder API using local registry keys, typed resource definitions, explicit environment input, and reusable relationship methods. A deploy recipe then hands that blueprint to a stack or CDK app for rendering. This keeps variable management manageable while preserving mtngTOOLS-wide naming consistency through `core` environment and naming contracts.
+
+## Documentation Requirements
+
+All resource and relationship specifications created moving forward MUST include an **Examples** section that strictly adheres to the following progression:
+
+1. **Easy to Copy**: Provide simple, copy-pasteable examples of the default "automatic" usage.
+2. **Eject to Custom Code (Anti Lock-in)**: You MUST provide an example showing how to replace the automatic wrapper with perfectly hard-coded custom native CDK code using the `addConstruct` (or `addWiring`) escape hatch. 
+   - This example must demonstrate how to call the builder's default props factories to generate the standard compliant physical name (keeping the stack stable), while allowing the user to take full control over the underlying native CDK construct.
+   - **Why this is critical**: This provides a clear, documented path forward for users so they are never locked into an abstraction that can't evolve. There are times when deleting and recreating a stateful stack is simply not an option. Showing developers exactly how to safely eject to native CDK ensures they can always unblock themselves without destroying their stack or breaking standard naming contracts.
+
+## Roadmap
+
+**Resources:**
+- **Phase 1**: `bucket`, `certificate`, `distribution`, `function`, `parameter`, `table`
+- **Future phase**: `queue`, `topic`, `httpApi`, `eventRule`, `stateMachine`
+
+**Relationships:**
+- **Phase 1**: `addEnvironment`, `addOrigin`, `allowInvoke`, `grantRead`, `grantWrite`, `grantSsmSecretsPrefix`
+- **Future phase**: `subscribe`, `addOutput`, `storeParameter`
 
 ## Status
 

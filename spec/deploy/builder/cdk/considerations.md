@@ -17,20 +17,13 @@ Non-normative notes from a design review of this folder ([README](./README.md)).
 
 ## Coverage gaps (spec vs README promises)
 
-- **Resources**: The main README lists methods such as `addQueue`, `addTopic`, `addHttpApi`, `addEventRule`, `addStateMachine`. [resources/README](./resources/README.md) indexes fewer primitives. Either narrow the README list to “phase 1,” maintain an explicit **not yet specified** list, or add stub specs so expectations stay in sync.
-- **Relationships**: The README names verbs such as `subscribe`, `addOutput`, `storeParameter`. [relationships/README](./relationships/README.md) indexes a smaller set. Same remediation as resources.
-- **Cross-stack**: Objectives mention exports/imports and stack boundaries; behavior remains thin. Specify **CloudFormation exports/imports vs SSM/parameters**, **when stack dependencies are required**, **logical ID / physical name stability** when splitting stacks, and **cyclic dependency** detection or documented avoidance patterns.
-- **Cross-stack refs without Outputs**: Document a default policy of avoiding **CDK Outputs/exports/imports** for cross-stack references. Prefer kind-specific reference registration methods (`addCrossStackReferenceByXxx…` vs `addExternalReferenceByXxx…`), backed by deterministic naming + an auto-tagging contract (`FullEnvItemName`) for future “ByTag” lookups.
 - **Stack overrides**: [stacks/README](./stacks/README.md) “stack-options” follow-up matters for implementation: **deep vs shallow merge** for `extensions`, **precedence** when root and stack both set hooks or naming, and whether **partial `env`** merges via `resolveEnv` or replaces dimensions.
 
 ---
 
 ## Lifecycle, validation, and failure modes
 
-- **Pre-build validation**: Enumerate required checks (missing refs, incompatible resource kinds for a relationship, duplicate keys, invalid cross-stack references). Clarify **error shape** (fail-fast vs aggregated messages).
-- **Ordering**: “Sort by dependency category” is underspecified relative to CDK’s own implicit dependencies. Document whether the builder relies on **explicit edges**, **topological ordering**, **registration order + validation**, and how that interacts with CDK dependency synthesis.
 - **Post-build hooks**: For aspects, tags, outputs—define **ordering** (e.g. tags relative to aspects) and whether hooks may **mutate** constructs or are observation-only.
-- **Removal / destroy**: Call out default `removalPolicy`, retained resources, buckets with objects, and similar—either as builder defaults or as explicit **recipe responsibilities** so behavior is not surprising.
 
 ---
 
@@ -38,7 +31,6 @@ Non-normative notes from a design review of this folder ([README](./README.md)).
 
 - **IAM**: Clarify whether defaults target **least privilege** vs broader bootstrap policies; how **relationship verbs** map to IAM breadth (`grantRead` / `grantWrite` especially).
 - **Secrets**: Normative SSM Parameter Store prefix model, Lambda env wiring, and **`grantSsmSecretsPrefixAccess`** are specified in [secrets/README](./secrets/README.md); rotation and KMS edge cases remain documented alongside defaults implementation.
-- **Encryption**: Defaults for SSE (S3, DynamoDB, queues), KMS (account default vs CMK), and **ownership** of keys when multiple recipes compose.
 - **Network**: VPC-attached compute, security groups, private APIs in certain environments—either env dimensions or recipe-level options so “network-shaped” resources stay intentional.
 
 ---
