@@ -19,8 +19,15 @@ Detailed stack composition behavior specifications for builder `addStack` live i
 
 ## Cross-stack references (direction)
 
-- **Default**: Avoid CloudFormation **Outputs** / exports/imports as the primary cross-stack reference mechanism.
-- **Cross-stack vs external**:
-  - **cross-stack**: the referenced resource is **defined by the same builder graph** (possibly in another stack), so its **compliant physical name** can be derived deterministically from `FullEnv` / `StorageEnv` naming.
-  - **external**: the referenced resource exists outside the builder graph; it may be non-compliant, so references typically require an **explicit physical name** (or other explicit identifiers).
+- **Avoid CfnOutputs**: The builder explicitly avoids CloudFormation **Outputs** (exports/imports) to prevent painful tight coupling on deletions/updates.
+- **Name Lookup Only**: The *only* cross-stack strategy is lookup via deterministic physical name (e.g., bucket name).
+- **CDK Primitives**: The builder itself does not implement a custom search mechanism. It utilizes standard CDK primitives (like `Bucket.fromBucketName` or `fromLookupByName`) to resolve references identically to native CDK.
 - **Shape in recipes**: Prefer explicit, kind-specific reference registration methods such as `addCrossStackReferenceByBucketName` / `addExternalReferenceByBucketName` so recipe intent is obvious even if implementations converge.
+
+## Stack Merge Semantics
+
+- **Shallow Merge by Category**: When `options.extensions` are provided in `addStack`, they perform a shallow merge at the extension category level. Overriding `resources` replaces the entire `resources` object for that stack, but leaves `relationships` untouched.
+
+## Logical ID Stability
+
+- **Native CDK Generation**: The builder ignores logical IDs and lets CDK generate them natively based on stack and construct hierarchy. Moving resources across stacks or refactoring the hierarchy results in a delete-and-recreate. Because stateful resources are set to `RETAIN` in production and rely on physical names, a Logical ID change will safely abandon the old resource, and the new resource creation will intentionally fail (due to a physical name conflict), forcing the developer to safely import or migrate the resource.
