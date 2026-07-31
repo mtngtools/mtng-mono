@@ -13,7 +13,7 @@ orchestrate apps and resources (dev through prod)
 
 ## Patterns
 
-Reusable approaches to common problems: [patterns/README.md](./patterns/README.md) (starts with [timeline & steps](./patterns/timeline-steps.md)).
+Reusable approaches to common problems: [patterns/README.md](./patterns/README.md) (starts with [timeline & steps](./patterns/timeline-steps/README.md)).
 
 ## Framework
 
@@ -30,5 +30,6 @@ section of [package-directory.md](../package-directory.md).
 
 - **Data Import**: See [data/session-data-import.md](./data/session-data-import.md) for requirements around mocking, importing, and transforming 
 session and room data.
+- **Meeting**: See [data/meeting/README.md](./data/meeting/README.md) for open questions/gaps in the `Meeting` entity type.
 
 See also: [mtngTOOLS package directory](../package-directory.md), [repo overview](../README.md), [SUBMODULES](../SUBMODULES.md).
