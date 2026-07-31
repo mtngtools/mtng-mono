@@ -1,6 +1,6 @@
 # CDK Builder Package Requirements
 
-TypeScript builder pattern that decouples mtngTOOLS infrastructure declarations from AWS CDK stack implementation. It focuses on a blueprint approach where resource intent is registered first and CDK constructs are created only during an explicit build phase. 
+TypeScript builder implementing the blueprint pattern described in [ADR-0002](../../adr/0002-cdk-builder-blueprint-pattern.md). Resources are registered via intent-declaration methods, then instantiated during an explicit `.build()` phase. 
 
 Leverages application environment and naming contracts from `core` to produce deterministic, pure, and reusable infrastructure declarations--allowing for minimal deploy code for standard patterns and easy overrides for special cases.
 

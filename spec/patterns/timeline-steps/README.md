@@ -1,12 +1,12 @@
 # Timeline & steps
 
-- **Idea:** model evolving state as a **timeline** with explicit **steps**; transitions are defined, not ad hoc; UI, APIs, and jobs key off the current step.
-- **Define terms**:
-    - **Timeline**: A timeline is discrete phase of an entity lifecycle (see session example below).
-    - **Step**: A step unit of work that needs to happen in support of managing the state and resources as an entity moves through the phases of a timeline (see example steps below). There can be multiple steps to support a particular phase of a timeline (see session example below).
-    - **Step Pre-requisite**: A condition to check whether a step is ready to worked on.
-    - **Step List**: A list of steps to moves through all the phases of a timeline.
-- **Why:** avoids scattered flags and implicit “phase” logic when many surfaces must agree on the same moment in the lifecycle.
+Model entity evolution as explicit **timelines** (phases) with ordered **steps** (units of work). For the design rationale, see [ADR-0004](../../adr/0004-timeline-steps-pattern-for-entity-lifecycle.md).
+
+**Definitions:**
+- **Timeline**: Discrete phase in entity lifecycle (e.g., `pre-live`, `live`, `archive`)
+- **Step**: Unit of work advancing the entity; named by call-to-action (e.g., `set-to-live`, `submit-encode`)
+- **Prerequisite**: Condition that must be true before a step can execute
+- **Step List**: Ordered sequence of steps through all timeline phases
 
 ## Session example
 

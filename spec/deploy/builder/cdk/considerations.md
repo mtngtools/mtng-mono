@@ -1,6 +1,6 @@
 # CDK builder spec — considerations
 
-Non-normative notes from a design review of this folder ([README](./README.md)). Use these items to extend specs, align README promises with indexed docs, and steer implementation.
+Design review notes for the CDK builder. For decisions on lifecycle and validation, see [ADR-0003](../../adr/0003-cdk-builder-lifecycle-validation-and-failure-modes.md). These items track gaps, edge cases, and open questions to address in implementation.
 
 ---
 
