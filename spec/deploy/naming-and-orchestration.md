@@ -1,6 +1,6 @@
 # Deployment naming and orchestration
 
-This document records **repo-level** choices for mtngTOOLS **DEPLOY** packages: what we call things, how **suites** relate to **recipes**, and how to wire **pnpm** so slices deploy independently or as a group.
+Naming and layout conventions for mtngTOOLS **DEPLOY** packages. For the design rationale behind this structure, see [ADR-0001](../../spec/adr/0001-deploy-recipe-suite-naming-and-layout.md).
 
 ## Repository layout
 
