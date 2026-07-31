@@ -34,6 +34,10 @@ Full detail: [packages/core/spec/app-env.md](packages/core/spec/app-env.md).
 - **Room (`rm*`)**: Physical or logical location for sessions; identifiers and optional venue metadata.
 - **Session (`ss*`)**: A scheduled block (title, start/end, optional room link `rmId`, optional `qaLink`, contains presentations).
 - **Presentation (`pr*`)**: A talk or segment within a session, contains **speakers**.
+- **Presentation phase**: One of up to three ordered timed portions a presentation block subdivides into. Any phase may be absent. The three phases, in order, are:
+  - **Introduction** (`intro`): Opening remarks, typically by a moderator.
+  - **Talk** (`talk`): The formal presentation itself. Named to avoid colliding with **Presentation** (the whole block).
+  - **Questions** (`qa`): The audience Q&A. The `qa` segment reuses the existing `qaLink` convention on **Session**.
 - **Speaker (`sp*`)**: Person associated with a presentation or session.
 - **Resolved variations** (`ResolvedMeeting`, `ResolvedSession`, etc.): Variants where optional fields are resolved from other fields or configurable defaults.
 - **Exhibition Hall**: An area where organizations display products or services to meeting attendees.
