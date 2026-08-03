@@ -74,6 +74,7 @@ To ensure data consistency in the UI and downstream consumers, we provide "Resol
     - Falling back to `Id` if `Slug` is missing.
     - Formatting timestamps into strings (e.g., `ssStart` -> `ssStartStr`).
     - Synthesizing combined fields from parts (e.g., `[rmVenue], [rmName]`-> `rmFullName`).
+- **Not this pattern**: complex, multi-step algorithmic derivation (e.g. the presentation-phase timing resolver) is a different pattern — see **§7 Calculated Types Pattern** below. Don't conflate the two just because both produce a "more complete" value from a "less complete" one.
 
 
 ### 3. Flexible Data Parts (Intentional Redundancy)
@@ -95,4 +96,13 @@ To support rich UI filtering and organization-specific extensions, entities (esp
 - **`*Type`**: `string` (Optional) - A high-level categorization (e.g., `ssType: 'Keynote'`, `rmType: 'Ballroom'`).
 - **`*Tags`**: `string[]` (Optional) - Fine-grained taxonomic markers (e.g., `ssTags: ['oncology', 'featured']`).
 - **`*Metadata`**: `Record<string, any>` (Optional) - A flexible "escape hatch" for non-domain-specific data required by a specific implementation without changing the core schema.
+
+### 7. Calculated Types Pattern
+Distinct from the **Resolved Types Pattern** (§3 above) — don't conflate the two. Resolved types are simple, cheap, default-filling (safe to call inline in any component). Calculated types are the output of **complex, multi-step algorithmic derivation**, and are cached rather than recomputed on every read.
+
+- **Objective**: Derive a value that can't be produced by simple defaulting — it depends on a real algorithm (multiple inputs, edge-case handling, non-trivial math), not just "fall back to X if Y is missing."
+- **Mechanism**: A dedicated resolver/algorithm (not a generic `resolve<Source, Resolved>` shape) produces the calculated value. The result is stored as a **separate, explicitly-named cache field** on the base entity — e.g. `PresentationBase.prPhasesCalculated?: PresentationCalculatedTiming` alongside the raw `prPhases?: PresentationPhases` it was derived from — rather than replacing the raw field or being recomputed by every consumer.
+- **Naming**: types use a `*Calculated*` qualifier (not `Resolved*`) to keep the two patterns visually distinct in code review. The raw/authored field and its calculated counterpart are two separate optional fields on the same entity, not a union of one field that could be either shape.
+- **Never throws**: a calculated-types resolver should be **total** — malformed input degrades gracefully (with diagnostics) rather than throwing. See `PresentationCalculatedTiming.resolverNotes`.
+- **First example**: the presentation-phase timing resolver — see [`presentation-timing/`](presentation-timing/README.md).
 

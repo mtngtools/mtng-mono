@@ -2,6 +2,8 @@
 
 The `Meeting` entity type is defined in [`core/src/data/meeting.ts`](../../../packages/core/src/data/meeting.ts) and its field-naming/type-hierarchy conventions (prefixes, Base/Resolved patterns, key safety) are covered generically in [`core/src/data/spec/README.md`](../../../packages/core/src/data/spec/README.md). See also [GLOSSARY.md](../../../GLOSSARY.md#meeting-model-core--datameeting) for the domain definition. This doc only covers what isn't already obvious from those sources.
 
+See [`core/src/data/spec/presentation-timing/`](../../../packages/core/src/data/spec/presentation-timing/README.md) for the presentation-phase timing model (`prPhases`, cues, timer hints, session-level defaults) — lives package-local since it doesn't (yet) span beyond `core`.
+
 ## Open questions / gaps
 
 - **`mtDir` is the only required identifier — there is no `mtId`.** Every other entity (`rm`/`ss`/`pr`/`sp`) uses an `*Id`. `mtDir` doubles as both the stable identifier and the directory/key segment (see [`meeting-keys.ts`](../../../packages/core/src/data/meeting-keys.ts)), and [`core/spec/app-env.md`](../../../packages/core/spec/app-env.md) notes `orgDir` is deliberately kept distinct from a meeting id. Worth confirming this asymmetry is intentional rather than a naming gap, since it breaks the `*Id` convention documented for other entities.
