@@ -38,6 +38,7 @@ Full detail: [packages/core/spec/app-env.md](packages/core/spec/app-env.md).
   - **Introduction** (`intro`): Opening remarks, typically by a moderator.
   - **Talk** (`talk`): The formal presentation itself. Named to avoid colliding with **Presentation** (the whole block).
   - **Questions** (`qa`): The audience Q&A. The `qa` segment reuses the existing `qaLink` convention on **Session**.
+  - Per-phase timing configuration (durations, cue schedule, timer hints, session-level defaults) is specced in [`core/src/data/spec/presentation-timing/`](packages/core/src/data/spec/presentation-timing/README.md).
 - **Speaker (`sp*`)**: Person associated with a presentation or session.
 - **Resolved variations** (`ResolvedMeeting`, `ResolvedSession`, etc.): Variants where optional fields are resolved from other fields or configurable defaults.
 - **Exhibition Hall**: An area where organizations display products or services to meeting attendees.
