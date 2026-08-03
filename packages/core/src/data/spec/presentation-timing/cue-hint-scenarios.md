@@ -2,6 +2,8 @@
 
 Companion to [README.md](README.md), which has the type definitions and full model — this doc doesn't repeat those. It captures the concrete scenarios that drove the `timerHints`/cue design, and *why* rejected alternatives were rejected, so a future agent extending this model doesn't have to re-derive reasoning that's already settled.
 
+> **Encoding note (post-#37):** the examples below use the original `{ minutes: N }` value shape and pre-date the reusability revision (map #45). Timer-hint `floor`/`cap` values are now the minutes-*or*-percent `TimingQuantity` (`{ unit, value }`), `when*` gained a shared `whenUnits`, cues gained `atUnits`, and cue/hint sets can be **named and referenced** — see [README.md](README.md). The *reasoning* captured here (gating, floor/cap, `remaining`, `protectQA`, array-order combination) is unchanged; only the literal encoding evolved.
+
 ## Why `timerHints` looks the way it does
 
 ### talk: `protectQA`, and the three designs before it
@@ -23,10 +25,10 @@ Concrete organizer intent, near-verbatim: *"qa gets time until the scheduled end
 
 ```ts
 timerHints: [
-  { kind: 'remaining' },                                          // basis = block-remaining, not the planned minutes
-  { kind: 'floor', minutes: 3 },                                  // base floor
-  { kind: 'floor', minutes: 1, whenOverBy: 10 },                  // squeeze to 1 once 10+ over…
-  { kind: 'floor', minutes: 3, whenOverBy: 10, whenPrLateBy: 10 },// …unless also 10+ late — not their fault, keep 3
+  { kind: 'remaining' },                                                       // basis = block-remaining, not planned minutes
+  { kind: 'floor', unit: 'minutes', value: 3 },                                // base floor
+  { kind: 'floor', unit: 'minutes', value: 1, whenOverBy: 10 },                // squeeze to 1 once 10+ over…
+  { kind: 'floor', unit: 'minutes', value: 3, whenOverBy: 10, whenPrLateBy: 10 },// …unless also 10+ late — keep 3
 ]
 ```
 
