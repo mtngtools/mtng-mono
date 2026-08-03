@@ -10,6 +10,7 @@ Repo-level spec entry point. Package `spec/` dirs hold app-specific detail. Spec
 - **env** — Varlock, `.env` fragments, secrets, load paths, drives [core:app-env](../packages/core/spec/app-env.md) to name and 
 orchestrate apps and resources (dev through prod)
 - **style** — UI/branding tokens, code and component conventions
+- **cross-language portability** — shared, boundary-crossing data-model types should be designed to port to C#/.NET; see [ADR-0005](./adr/0005-cross-language-compatibility.md)
 
 ## Patterns
 

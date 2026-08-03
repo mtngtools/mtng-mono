@@ -10,6 +10,7 @@ Architectural decisions that shaped mtngTOOLS infrastructure, data model, and de
 | [0002](./0002-cdk-builder-blueprint-pattern.md) | CDK Builder Blueprint Pattern for Infrastructure Declaration | Accepted |
 | [0003](./0003-cdk-builder-lifecycle-validation-and-failure-modes.md) | CDK Builder Lifecycle, Validation, and Failure Modes | Accepted |
 | [0004](./0004-timeline-steps-pattern-for-entity-lifecycle.md) | Timeline & Steps Pattern for Entity Lifecycle State Management | Accepted |
+| [0005](./0005-cross-language-compatibility.md) | Shared Types Should Be Portable to C#/.NET | Accepted |
 
 ## How to Read These
 

@@ -14,6 +14,11 @@ export type MeetingBase = {
 export type Meeting = Simplify<MeetingBase & {
     mtSlug?: string,
     mtName: string,
+    // Named cue/timer-hint libraries (#47). The meeting is the PRIMARY store — sessions/presentations
+    // usually just reference into these by key (see `cuesRef`/`timerHintsRef`; a session may shadow a key
+    // via `ssCueSets`/`ssHintSets`). Per-phase namespaces, each with its own optional `default` key.
+    mtCueSets?: PhaseNamedSets<PresentationPhaseCue>,
+    mtHintSets?: PhaseNamedSets<PresentationPhaseTimerHint>,
 } & TzConfig>;
 
 export type MeetingDataVersion = {
@@ -66,9 +71,23 @@ export type SessionBase = Simplify<{
     ssSpeakerNames?: string[], // optional array of all speaker names for session summaries
     ssModeratorNames?: string[], // optional array of all moderator names for session summaries
     ssPhaseDefaults?: SessionPhaseDefaults, // session-wide default cues/timerHints per presentation phase; see spec/data/meeting/presentation-timing/
+    // Session-level named cue/hint libraries (#47) — add to, or shadow same-key entries of, the meeting's
+    // `mt*Sets`. Optional/rarely populated: the meeting is normally the sole store. Ref lookup is session-lib
+    // THEN meeting-lib.
+    ssCueSets?: PhaseNamedSets<PresentationPhaseCue>,
+    ssHintSets?: PhaseNamedSets<PresentationPhaseTimerHint>,
 } & Partial<HasRoomId>>;
 
 // --- Presentation phase timing (spec: spec/data/meeting/presentation-timing/) ---
+
+// Shared minutes-or-percent encoding (#46). The explicit `unit` discriminator (no magic-number
+// sentinels) keeps this portable to C#/.NET per ADR-0005. The percentage denominator is fixed by the
+// consuming field's role — never author-selected — so there is no "percent of what" selector.
+export type TimingUnit = 'minutes' | 'percent';
+export type TimingQuantity = {
+    unit?: TimingUnit,          // absent ⇒ 'minutes' (matches the sibling whenUnits/atUnits)
+    value: number,              // may be negative where the field is signed
+}
 
 export type PresentationPhaseCue = {
     kind: string,               // 'warn' | 'warn2' | 'over' | 'over2' or any custom string — a consumer-facing
@@ -76,23 +95,34 @@ export type PresentationPhaseCue = {
     anchor?: 'start' | 'end',   // defaults 'end'
     at: number,                 // signed threshold. anchor 'end': positive = before end, negative = after end.
                                  //   anchor 'start': positive = after start, negative = before start.
+    atUnits?: TimingUnit,       // absent ⇒ 'minutes' (#50). 'percent' reinterprets only |at| as a percentage of the
+                                 //   phase STARTING TIMER VALUE — the minutes placed on the timer when the phase starts
+                                 //   (after any `remaining` basis-switch + up-front floor/cap). NOT the floor/cap basis
+                                 //   below. Sign/anchor unchanged; no [0,100] clamp. % cue dropped (+resolverNotes)
+                                 //   only when that starting value is 0; absolute cues always kept.
 }
 
 export type PhaseTimerHintBase = {
     // Gating conditions — an entry qualifies only when ALL present conditions hold (logical AND).
-    whenOverBy?: number,        // cumulative pr overage (minutes, vs. scheduled prEnd) required to activate
-    whenPrEarlyBy?: number,     // pr block started at least this many minutes early
-    whenPrLateBy?: number,      // pr block started at least this many minutes late
+    whenUnits?: TimingUnit,     // ONE unit for ALL when* thresholds in this entry; absent ⇒ 'minutes' (#46).
+                                 //   'percent' = of the presentation BLOCK (prEnd − prStart). Can't be mixed across the three.
+    whenOverBy?: number,        // cumulative pr overage (vs. scheduled prEnd) required to activate — minutes, or % of block
+    whenPrEarlyBy?: number,     // pr block started at least this much early — minutes, or % of block
+    whenPrLateBy?: number,      // pr block started at least this much late — minutes, or % of block
 }
 
+// floor/cap carry a minutes-or-percent amount by intersecting TimingQuantity (#46): { unit, value }.
+// A 'percent' floor/cap is of the phase's INITIAL calculated minutes (PresentationCalculatedPhase.minutes) —
+// a DIFFERENT basis than a cue's `atUnits` (phase starting timer value). A 0-calc phase ignores a % floor/cap
+// (floor→0, cap→∞, +resolverNotes) but still honors an absolute floor/cap and a `remaining` basis-switch.
 export type PresentationPhaseTimerHint =
-    | (PhaseTimerHintBase & { kind: 'remaining' })              // switch basis: ignore this phase's planned
-                                                                 //   `minutes`, use actual time remaining before prEnd
-    | (PhaseTimerHintBase & { kind: 'floor', minutes: number })  // minimum duration
-    | (PhaseTimerHintBase & { kind: 'cap', minutes: number })    // maximum duration
-    | (PhaseTimerHintBase & { kind: 'protectQA' })               // TALK-ONLY (ignored on intro/qa): cap talk at its
-                                                                 //   own calculated minutes so it can't borrow qa's
-                                                                 //   time. Valueless flag; a cap-producer. See spec.
+    | (PhaseTimerHintBase & { kind: 'remaining' })                 // switch basis: ignore this phase's planned
+                                                                    //   `minutes`, use actual time remaining before prEnd
+    | (PhaseTimerHintBase & { kind: 'floor' } & TimingQuantity)    // minimum duration — { unit, value }
+    | (PhaseTimerHintBase & { kind: 'cap' } & TimingQuantity)      // maximum duration — { unit, value }
+    | (PhaseTimerHintBase & { kind: 'protectQA' })                 // TALK-ONLY (ignored on intro/qa): cap talk at its
+                                                                    //   own calculated minutes so it can't borrow qa's
+                                                                    //   time. Valueless flag; a cap-producer. See spec.
     | (PhaseTimerHintBase & { kind: string, [key: string]: unknown }); // custom/extensible
 
 export type PresentationPhase = {
@@ -100,8 +130,14 @@ export type PresentationPhase = {
                          //   doesn't exist · −1 = fill (elastic, absorbs remaining block time) · −2 = no-time
                          //   (shown, off the committed clock)
     label?: string,      // overrides the default agenda label (Introduction / Talk / Questions) for this phase
+    // A phase's cue source and hint source are each an inline-array OR a named-ref discriminated union (#48),
+    // dual-encoded here as two optional wire fields (cf. `minutes`). The two never merge: a resolver reads one.
+    // If BOTH the array and its `*Ref` are set, the inline array WINS (+resolverNotes). A `*Ref` names a key
+    // resolved session-lib THEN meeting-lib; a dangling ref falls through the precedence ladder. See spec.
     cues?: PresentationPhaseCue[],
+    cuesRef?: string,
     timerHints?: PresentationPhaseTimerHint[],
+    timerHintsRef?: string,
 }
 
 export type PresentationPhases = {
@@ -110,15 +146,35 @@ export type PresentationPhases = {
     qa?: PresentationPhase,
 }
 
+// A session default's cue/hint source is the same inline-OR-ref union as a PresentationPhase's (#48):
+// the session default may itself be a named ref (resolved session-lib then meeting-lib). Literal wins if both.
 export type SessionPhaseDefault = {
     cues?: PresentationPhaseCue[],
+    cuesRef?: string,
     timerHints?: PresentationPhaseTimerHint[],
+    timerHintsRef?: string,
 }
 
 export type SessionPhaseDefaults = {
     intro?: SessionPhaseDefault,
     talk?: SessionPhaseDefault,
     qa?: SessionPhaseDefault,
+}
+
+// Named, reusable cue/hint libraries (#47). One namespace per phase; within a namespace, `sets` maps a
+// string key to one phase's array, and `default` optionally names the key used when nothing more specific
+// applies. Keyed map (unordered — C# Dictionary; ADR-0005), so the default is a single string, not a per-set
+// flag. Referenced by `cuesRef`/`timerHintsRef` (PresentationPhase / SessionPhaseDefault) and hosted at both
+// Meeting (`mt*Sets`, primary) and Session (`ss*Sets`, shadowing) level.
+export type NamedSets<T> = {
+    sets: Record<string, T[]>,   // key → a set (one phase's array)
+    default?: string,            // names a key in `sets`; absent = no default
+}
+
+export type PhaseNamedSets<T> = {
+    intro?: NamedSets<T>,
+    talk?: NamedSets<T>,
+    qa?: NamedSets<T>,
 }
 
 // Complex-resolver output (see "Calculated Types Pattern", packages/core/src/data/spec/README.md) —
@@ -230,12 +286,19 @@ export type ResolvedPresentation<
 }>;
 
 // Simple-fallback tier (this file's ordinary "Resolved Types Pattern", not the complex resolver above):
-// merges SessionPhaseDefaults into a presentation's PresentationCalculatedTiming for cues/timerHints left
-// unset at the presentation level. Callers supply both the presentation's calculated timing and the
-// session's ssPhaseDefaults; how that merge/lookup is performed is left to the caller (out of this map's scope).
+// selects each phase's effective cues/timerHints by WHOLE-FIELD OVERRIDE down a specificity ladder (#48) —
+// first present wins, used entirely (no merge/concat):
+//   1. presentation source  — prPhases.<phase>.cues | .cuesRef            (literal wins if both set)
+//   2. session source        — ssPhaseDefaults.<phase>.cues | .cuesRef     (literal wins if both set)
+//   3. library default        — ssCueSets.<phase>.default else mtCueSets.<phase>.default
+//   4. none
+// Any ref resolves session-lib THEN meeting-lib; a dangling ref falls through to the next rung (+resolverNotes).
+// The selected array is carried VERBATIM — any minutes-or-percent values stay symbolic; % → minutes is resolved
+// by the timer at runtime, never baked into this tier (out of this map's scope). Callers supply the presentation's
+// calculated timing, the session's ssPhaseDefaults/ss*Sets and the meeting's mt*Sets; the lookup itself is the caller's.
 export type ResolvedPresentationPhase = Simplify<PresentationCalculatedPhase & {
-    cues?: PresentationPhaseCue[];             // from prPhases.<phase>.cues, else ssPhaseDefaults.<phase>.cues
-    timerHints?: PresentationPhaseTimerHint[]; // from prPhases.<phase>.timerHints, else ssPhaseDefaults.<phase>.timerHints
+    cues?: PresentationPhaseCue[];             // effective cues per the ladder above (symbolic percentages preserved)
+    timerHints?: PresentationPhaseTimerHint[]; // effective timerHints per the ladder above
 }>;
 
 export type ResolvedPresentationPhases = {
