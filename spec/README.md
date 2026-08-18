@@ -24,6 +24,10 @@ Where FRAME code is split across Vue, Nuxt, and Nitro surfaces—with standards 
 See the [mtngTOOLS package directory](../package-directory.md) and [overview](../README.md) for layers (UTILS, CORE, FRAME, 
 PROVIDE, COMPOSE, DEVELOP, DEPLOY, BUILD) and dependency rules.
 
+- **PRODUCE (.NET)**: the Produce domain's .NET surface lives in [mtng-dotnet-mono](https://github.com/mtngtools/mtng-dotnet-mono) 
+(source of truth); this repo carries only a thin index — see [produce/README.md](./produce/README.md) and the PRODUCE (.NET) 
+section of [package-directory.md](../package-directory.md).
+
 - **Data Import**: See [data/session-data-import.md](./data/session-data-import.md) for requirements around mocking, importing, and transforming 
 session and room data.
 
