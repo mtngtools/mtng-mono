@@ -113,4 +113,14 @@ Infrastructure shell. Once packages are split from the initial mono-repo, build 
 | :--- | :--- | :--- | :--- |
 | `build` | Gitmodules, pnpm workspace, turbo build config. | [build](https://github.com/mtngtools/build) | planned |
 
+## PRODUCE (.NET)[^2]
+
+The **Produce** domain's .NET surface (desktop apps, the local controller and its manager services, and their shared libraries). Each row below **is** the whole overview — 1-liner + repo link + status; the canonical spec is co-located with the code in **mtng-dotnet-mono** and never duplicated here ([ADR-0006](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/spec/adr/0006-spec-placement-and-docs.md)). Naming follows `MtngTools.<Layer>.<Area>…` ([ADR-0003](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/spec/adr/0003-package-and-namespace-naming.md)); see the [landing note](spec/produce/README.md).
+
+| Package | Description | Repo | Status |
+| :--- | :--- | :--- | :--- |
+| `MtngTools.Core.Wire` | Mechanical C# mirror of the TS/Zod wire contract, generated from `mtng-wire-schemas` ([spec](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/src/stable/Core/MtngTools.Core.Wire/spec/README.md)). | [mtng-dotnet-mono](https://github.com/mtngtools/mtng-dotnet-mono) | alpha |
+
 [^1]: These packages live in the **hls** repository, not the main monorepo.
+
+[^2]: The PRODUCE (.NET) surface lives in the **mtng-dotnet-mono** repository, not the main monorepo; that repo's `spec/` is the source of truth (ADR-0006).
