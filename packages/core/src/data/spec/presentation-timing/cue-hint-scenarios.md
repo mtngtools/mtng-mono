@@ -2,7 +2,7 @@
 
 Companion to [README.md](README.md), which has the type definitions and full model — this doc doesn't repeat those. It captures the concrete scenarios that drove the `timerHints`/cue design, and *why* rejected alternatives were rejected, so a future agent extending this model doesn't have to re-derive reasoning that's already settled.
 
-> **Encoding note (post-#37):** the examples below use the original `{ minutes: N }` value shape and pre-date the reusability revision (map #45). Timer-hint `floor`/`cap` values are now the minutes-*or*-percent `TimingQuantity` (`{ unit, value }`), `when*` gained a shared `whenUnits`, cues gained `atUnits`, and cue/hint sets can be **named and referenced** — see [README.md](README.md). The *reasoning* captured here (gating, floor/cap, `remaining`, `protectQA`, array-order combination) is unchanged; only the literal encoding evolved.
+> **Encoding note (post-#37):** the examples below use the original `{ minutes: N }` value shape and pre-date the reusability revision (map #45). Timer-hint `floor`/`cap` values are now the minutes-*or*-percent `TimingQuantity` (`{ unit, value }`), `when*` gained a shared `whenUnits`, cues gained `atUnits`, and cue/hint sets can be **named and referenced** — see [README.md](README.md). The *reasoning* captured here (gating, floor/cap, `remaining`, `protectQA`, array-order combination) is unchanged; only the literal encoding evolved. **Since then (#54/#55)** the phase tiers share a concrete `PresentationPhaseBase` (adding a `load` directive), and a whole-presentation **preset** (`prPhasesPreset`) composes through a **per-(phase, prop) ladder** — see the worked scenarios in the final section of this doc.
 
 ## Why `timerHints` looks the way it does
 
@@ -47,3 +47,33 @@ Real need that ruled out `warn1`/`warn2`/`over1`/`over2` fixed fields: *"a talk 
 ## What `resolverNotes` almost was
 
 Early drafts named this field `warnings`. That invited exactly the confusion it now avoids: `warnings` reads as if it might *be* the cue schedule (`warn`/`warn2` kinds), when it's actually the resolver's own data-quality diagnostics (e.g. "≥2 `fill` detected, normalized") — a completely unrelated concept. Renamed specifically to kill that ambiguity at the name level rather than relying on a comment to disambiguate it.
+
+## The per-(phase, prop) ladder & presets (#54/#55)
+
+These validate the **per-(phase, prop)** composition (README's §"Composing sources"). The rule to keep in mind: props (`label`/`cues`/`timerHints`/`load`) merge **across** a phase — each sourced independently down `explicit → preset → session-default → library-default → none` — but within one prop the winning value **replaces whole** (arrays never element-merge; `[]` counts as present). Presets/refs resolve at the *Resolved* tier only; durations are untouched.
+
+### The scenario that forced per-prop granularity
+
+Organizer intent, near-verbatim: *"every lightning talk uses our standard label, cues, hints and auto-loads — but THIS one talk I want to hand-tune just the cues."*
+
+```ts
+// meeting library
+mtPhasePresets: { lightning: { talk: { label: 'Lightning', load: 'auto', cues: [A], timerHints: [H] } } }
+// the one presentation
+prPhasesPreset: 'lightning',
+prPhases: { talk: { minutes: 5, cues: [B] } }   // overrides talk's CUES only
+```
+
+Effective `talk` = `{ label:'Lightning' (preset), load:'auto' (preset), cues:[B] (explicit — [A] discarded, never merged), timerHints:[H] (preset), minutes:5 }`. This is *why* the ladder is per-prop, not per-phase whole-field: a per-phase override would have forced the organizer to re-state `label`/`load`/`timerHints` just to change cues. `minutes` rides the raw phase, never the preset (presets carry no durations).
+
+### Dangling preset key falls through
+
+`prPhasesPreset: 'lightnin'` (typo, in neither library) → resolves as if unset (+`resolverNotes`); every prop falls to the next rung (session default, then library default, then none). Never throws, never blanks. Same total-resolver guarantee as a dangling `cuesRef`.
+
+### `load` composes like any other prop — but only two rungs feed it here
+
+`load` ladders `explicit → preset → (downstream host phaseLoading) → ignore`. It has **no** session-default or library-default rung (a session-wide load default is the room's job). So: a preset's `talk.load: 'auto'` applies unless the presentation sets its own `prPhases.talk.load` (e.g. `'auto-paused'` to load-but-hold when a third-party driver reports the phase but not whether to run). Absent both ⇒ effective `ignore` (until the downstream room `phaseLoading`/`timerAutomation` layer, which is out of this spec).
+
+### Session default supplies cues/hints, never label/load
+
+A `ssPhaseDefaults.qa = { timerHintsRef: 'qa-standard' }` fills `qa`'s hints when neither the explicit phase nor the preset does — but a session default can't carry `label`/`load` (it's a cue/hint policy). Those two props simply skip the session-default rung.

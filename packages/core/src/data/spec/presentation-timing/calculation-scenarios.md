@@ -4,6 +4,8 @@ Companion to [README.md](README.md) — every combination of `{absent, concrete,
 
 Raw values use the tokens from README.md's `minutes` value-semantics table: `0` absent (phase doesn't exist in this group) · `+` concrete · `−1` fill · `−2` no-time.
 
+> **Unaffected by presets / `load` (#54/#55):** durations are computed from `minutes` + the block alone. A **preset** carries no `minutes`, and **`load`** is behavior, not time — both resolve at the *Resolved* tier, downstream of this *Calculated* enumeration. So this 64-row catalog stands exactly as-is; the preset-merge and per-(phase, prop) scenarios live in [cue-hint-scenarios.md](cue-hint-scenarios.md) instead.
+
 **Status:** ✓ likely & valid · ~ valid but unlikely · ✗ invalid (`≥2 fill`; resolver normalizes by priority `talk > qa > intro`, see README.md).
 
 **Rec:** `Auto` / `Fixed` = recommended for that authoring mode (README.md's authoring-modes guidance) · `*` = only when displaying an explicit intro time actually matters (a concrete intro is otherwise atypical) · `—` = not specifically recommended for either mode.

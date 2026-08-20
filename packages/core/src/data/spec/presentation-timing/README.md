@@ -1,6 +1,6 @@
 # Presentation Timing
 
-Per-phase timing **configuration data** for a presentation — durations, an agenda-display contract, an in-phase cue schedule, and timer hints — sufficient to drive a per-part countdown timer later. Types live in [`core/src/data/meeting.ts`](../../meeting.ts). Field-naming/type-hierarchy conventions (prefixes, Base/Resolved/Calculated patterns) are covered generically in [the parent spec README](../README.md); this doc only covers what's specific to presentation timing.
+Per-phase timing **configuration data** for a presentation — durations, an agenda-display contract, an in-phase cue schedule, timer hints, a per-phase `load` directive, and reusable named sets / phase presets — sufficient to drive a per-part countdown timer later. Types live in [`core/src/data/meeting.ts`](../../meeting.ts). Field-naming/type-hierarchy conventions (prefixes, Base/Resolved/Calculated patterns) are covered generically in [the parent spec README](../README.md); this doc only covers what's specific to presentation timing.
 
 **Scope line:** this spec defines **data** — durations, value semantics, cue/hint shapes. Timer **runtime behavior/UX** (rendering, chimes, countdown display, live overrides, the actual squeeze/merge algorithms) is out of scope. So is agenda UI implementation, per-phase performer attribution, and speaker-timer implementation.
 
@@ -31,17 +31,26 @@ This follows the **Calculated Types Pattern** ([parent spec README](../README.md
 
 `prPhasesCalculated` is a **derived cache of `prPhases`**: whoever writes `prPhases` is responsible for regenerating it, and a consumer that needs a guarantee of freshness should recompute from `prPhases` rather than trust a possibly-stale cache. When/where that regeneration happens (author-time, ingest, on read) is a pipeline concern, out of this spec's scope.
 
-### `PresentationPhase` (raw)
+### `PresentationPhaseBase`, the ref mixin, and `PresentationPhase` (raw)
+
+The three phase tiers (raw / calculated / resolved) share a **concrete-only base** — the four "not-a-duration, not-a-ref" props — plus two small mixins, so a value defined once carries the same meaning through every tier:
 
 ```ts
-export type PresentationPhase = {
-  minutes?: number;   // see value semantics below
-  label?: string;      // overrides the default agenda label (Introduction / Talk / Questions)
+export type PhaseLoad = 'auto' | 'auto-paused' | 'clear' | 'ignore' | 'next';   // see “The load directive” below
+export type PresentationPhaseBase = {   // concrete-only, ref-free — reused verbatim as a preset body
+  label?: string;                        // overrides the default agenda label (Introduction / Talk / Questions)
+  load?: PhaseLoad;                      // timer load directive; absent ⇒ effective 'ignore' (data-only)
   cues?: PresentationPhaseCue[];
   timerHints?: PresentationPhaseTimerHint[];
 }
+export type HasTimerCueHintRefs = { cuesRef?: string; timerHintsRef?: string };   // the named-ref pair — NOT in the base
+export type PhaseCalculatedTiming = { minutes: number; start: UnixTimestampMs; end: UnixTimestampMs; source: /* see below */ string };
+
+export type PresentationPhase = PresentationPhaseBase & HasTimerCueHintRefs & { minutes?: number };   // + the raw dual-encoding
 export type PresentationPhases = { intro?: PresentationPhase; talk?: PresentationPhase; qa?: PresentationPhase };
 ```
+
+**Why the base is ref-free.** `cuesRef`/`timerHintsRef` live in a *separate* `HasTimerCueHintRefs` mixin, never in the base, for two reasons: (1) **preset** bodies (below) reuse the base as a *terminal, concrete* value and must carry no refs; (2) it lets the base be shared into `PresentationCalculatedPhase` — which forwards cue/hint sources *unresolved* — while `ResolvedPresentationPhase` includes the base **without** the refs (which have been resolved away). A phase's cue source and hint source are each an inline array **or** a `*Ref`; if both are set the inline array wins (+`resolverNotes`). How the two are selected is the precedence ladder below.
 
 ### `minutes` value semantics
 
@@ -66,12 +75,16 @@ A single raw number, dual-encoded (DB-friendly wire format ⇄ a TS discriminate
 **The block is authoritative** — `prStart`/`prEnd` is the slot; phase `minutes` are a planned breakdown within it, never the other way around.
 
 ```ts
-export type PresentationCalculatedPhase = {
+export type PhaseCalculatedTiming = {   // the computed duration fields, factored out so Calculated & Resolved share them
   minutes: number;     // resolved concrete duration; 0 for no-time or a starved fill
   start: UnixTimestampMs;
   end: UnixTimestampMs; // start === end for a zero-length phase
   source: 'concrete' | 'fill' | 'no-time' | 'normalized-fill' | 'normalized-no-time'; // `normalized-*` = result of the ≥2-fill priority fallback above
 }
+// = base + refs + computed timing. Durations are resolved here, but cue/hint SOURCES ride along UNRESOLVED —
+// the phase's own inline arrays (via the base) and its `*Ref`s (via the mixin) are carried forward verbatim for
+// the Resolved tier to select + deref. Presets NEVER reach this tier (they carry no `minutes`).
+export type PresentationCalculatedPhase = PresentationPhaseBase & HasTimerCueHintRefs & PhaseCalculatedTiming;
 export type PresentationCalculatedPhases = { intro?: PresentationCalculatedPhase; talk?: PresentationCalculatedPhase; qa?: PresentationCalculatedPhase };
 export type PhaseFit = { fit: 'exact' } | { fit: 'slack'; slackMin: number } | { fit: 'overflow'; overMin: number };
 export type PresentationCalculatedTiming = {
@@ -88,6 +101,20 @@ Resolver pipeline, `resolve(block, rawPhases) → PresentationCalculatedTiming`:
 4. Durations: concrete → itself · `no-time` → 0 · `fill = max(0, B − Σconcrete)`.
 5. Place cumulative from `prStart` in `intro → talk → qa` order; per-phase `start`/`end`; `no-time`/zero-length → `start === end`.
 6. Fit: `exact` / `slack` (`B − total`, trailing idle) / `overflow` (`total − B`). Slack and overflow are computed and warned at input — never clamped or thrown. What a timer does with them is out of scope here.
+
+## The `load` directive
+
+`load?: PhaseLoad` (on every phase, via the base) is authored intent for **what a timer should do when this phase becomes current**. It is **data only** here — the five values are named below, but their runtime *precedence* and per-value *behavior* are owned downstream by the Timer manager (mtng-dotnet-mono `Compose/MtngTools.Compose.TimerManager`), exactly as cue-firing and floor/cap resolution are.
+
+| `load` | intent |
+| :-- | :-- |
+| `auto` | set-and-run this phase |
+| `auto-paused` | set-and-**hold** this phase (loaded, but `running:false`) — so a driver that reports *which* phase we're on, but not whether to start the clock, can load what to show; a separate command starts it. A `remaining`-basis phase **runs anyway** (it can't be staged). |
+| `clear` | clear the timer |
+| `ignore` *(effective default when absent)* | do nothing |
+| `next` | set-and-hold the *next* phase as a preview |
+
+Absent ⇒ effective `ignore`. The full runtime precedence — `explicit > preset > host phaseLoading > ignore`, plus the `timerAutomation` master kill-switch — lives downstream and is deliberately **out of this data-only spec**; only the value set and the `ignore` default are fixed here. (`load` still participates in the data-side ladder below, at the `explicit`/`preset` rungs.)
 
 ## Agenda-display requirements
 
@@ -141,6 +168,8 @@ This basis — the **phase starting timer value** — is deliberately **not** th
 ## Timer hints
 
 Configuration for how a phase's *actual* duration should behave under overrun — a completely different, dynamically-computed quantity than the phase's planned `minutes`. **This decoupling is deliberate**: a `fill`-resolved 10-minute plan can run for any actual duration once timer hints apply; nothing connects the two except the runtime evaluating these hints.
+
+**Timer hints are one-shot.** They are evaluated **once, at phase load**, to set the phase's *starting* timer value; they are **not** re-evaluated thereafter — a fixed clock runs from there. This is the counterpart to the cue rule and its deliberate mirror image: a **cue *fires* on a live predicate** (continuously), whereas a **hint *resolves* once** (at load). The runtime mechanics of that one-shot evaluation are the timer's, downstream.
 
 ```ts
 export type PhaseTimerHintBase = {
@@ -212,18 +241,19 @@ See [cue-hint-scenarios.md](cue-hint-scenarios.md) for the `talk` example (`prot
 Meeting organizers often want the same cue/hint policy across most presentations in a session, with room to override per presentation.
 
 ```ts
+// NARROW by design — a cue/hint policy only. NOT PresentationPhaseBase: no label, no load (see the ladder).
 export type SessionPhaseDefault = {
   cues?: PresentationPhaseCue[];        // inline default…
-  cuesRef?: string;                     // …or a named-set reference (below) — mutually exclusive (literal wins if both)
   timerHints?: PresentationPhaseTimerHint[];
-  timerHintsRef?: string;
-}
+} & HasTimerCueHintRefs;                // …or a named-set reference (cuesRef/timerHintsRef) — inline wins if both
 export type SessionPhaseDefaults = { intro?: SessionPhaseDefault; talk?: SessionPhaseDefault; qa?: SessionPhaseDefault };
 // on SessionBase:
 ssPhaseDefaults?: SessionPhaseDefaults;
 ```
 
-A session default is itself an inline-array-or-named-ref source, exactly like a presentation phase. How it combines with a presentation's own value and with the named-set defaults is the **precedence ladder** (below) — which generalizes the original **whole-field override, no merging** rule: a more-specific source replaces a less-specific one *entirely* (even an explicit `[]`), and arrays never merge or concatenate.
+**A session default supplies `cues`/`timerHints` only — deliberately not `label`/`load`.** It's a session-wide *cue/hint policy*; a session-wide `label` default is unnecessary (the built-in phase name covers it), and a session-wide `load` default is the room's job (host `phaseLoading`, downstream), not authored as meeting data. So in the ladder below, `label`/`load` have no session-default rung.
+
+A session default's `cues`/`timerHints` is itself an inline-array-or-named-ref source, exactly like a presentation phase's. How it composes with the presentation's own value, a **preset** (below), and the named-set defaults is the **per-(phase, prop) precedence ladder** (below): props merge *across* a phase, but within any one prop a more-specific source replaces a less-specific one *entirely* (even an explicit `[]`) — arrays never merge or concatenate.
 
 ## Named, reusable sets
 
@@ -248,41 +278,68 @@ cuesRef?: string;   timerHintsRef?: string;
 - **The default is a namespace-level string, not a per-set flag** — the library is an unordered keyed map (C# `Dictionary`; ADR-0005), which has no portable tiebreak for two flagged sets, so a single `default` string names the winner unambiguously and keeps each set a bare array.
 - **Two levels.** The **meeting** library (`mt*Sets`) is the expected primary store — most meetings populate it alone. A **session** library (`ss*Sets`) is optional: it adds new keys or shadows meeting keys of the same name. **Ref lookup resolves the session library first, then the meeting library.**
 
-## Composing sources — the precedence ladder
+## Phase presets
 
-For a phase, per payload (`cues` / `timerHints`), several sources can supply a value. They compose by **whole-field override**: the effective array is the **first present** rung of a specificity ladder, used **entirely** — lower rungs are discarded; nothing merges or concatenates.
+Where a named set is *targeted* reuse (one phase's cue **or** hint array), a **preset** is *coarse* reuse — a **"quick copy of everything"**: one named object supplying **all three phases' behavior/display props at once** (`label`/`load`/`cues`/`timerHints`), for speaker-management systems that can set only a single field. A presentation opts in with one string:
 
-| # | Rung | Source (shown for `cues`; `timerHints` is identical) |
-| :- | :- | :- |
-| 1 | presentation | `prPhases.<phase>.cues` **or** `.cuesRef` |
-| 2 | session default | `ssPhaseDefaults.<phase>.cues` **or** `.cuesRef` |
-| 3 | library default | `ssCueSets.<phase>.default` else `mtCueSets.<phase>.default` |
-| 4 | — | none (phase has no cues) |
+```ts
+prPhasesPreset?: string;   // on PresentationBase — names a preset in the libraries below
 
-- **Inline vs ref at one level is a discriminated union** — a level supplies *either* an inline array *or* a ref, never both. It's dual-encoded as two optional wire fields (like `minutes`); if both are somehow set, the **inline array wins** + `resolverNotes`.
-- **Ref resolution** (any rung's ref, and the rung-3 default key): look the key up in the **session** library, then the **meeting** library; the session shadows the meeting for the same key.
-- **Dangling ref** — a `*Ref` (or a `default`) whose key is in neither library is treated as if that rung specified nothing: resolution **falls through to the next rung** + `resolverNotes`. It never blanks the phase and never throws (the resolver is total — see §[Reconciliation & the resolver](#reconciliation--the-resolver)).
-- **Percentages stay symbolic here.** This selection carries the chosen array *verbatim*; any minutes-or-percent values are resolved to concrete minutes **by the timer at runtime** — their denominators (a floor/cap's calculated minutes; a cue's live starting value) mature only at/after phase start — never baked into the resolved data.
+export type PresentationPhasesPreset = { intro?: PresentationPhaseBase; talk?: PresentationPhaseBase; qa?: PresentationPhaseBase };
+export type PhasePresetLibrary = Record<string, PresentationPhasesPreset>;   // flat: preset-name → whole-presentation preset
+
+// libraries — Meeting (primary) + Session (shadows), beside mt/ssCueSets etc.:
+mtPhasePresets?: PhasePresetLibrary;   ssPhasePresets?: PhasePresetLibrary;
+```
+
+- **Behavior/display only.** A preset body **is** `PresentationPhaseBase` — so **no `minutes`** (durations stay schedule-driven: `prStart`/`prEnd` + `prPhases.minutes`/`fill`) and **no `*Ref`** (bodies are terminal/concrete). A preset never changes how long a phase is.
+- **Flat library — no per-phase namespace, no `default`.** Unlike `NamedSets` (per-phase namespaces, each with a `default`), a preset already spans all three phases, so its library is a flat `name → preset` map, and it has **no `default`**: a preset applies only when a presentation *names* it in `prPhasesPreset`.
+- **Two levels, session shadows meeting.** `prPhasesPreset` resolves in the **session** library then the **meeting** library; a session preset shadows a meeting preset of the same key. A **dangling key** (in neither) resolves as if `prPhasesPreset` were unset (+`resolverNotes`), never throws.
+- **Complements per-phase refs.** `cuesRef`/`timerHintsRef` are targeted, per-(phase, payload) reuse; a preset is the "set everything" affordance. Both feed the ladder below — the preset as its own rung.
+
+**A preset resolves at the `Resolved` tier only**, alongside `cuesRef`/`timerHintsRef` deref, at the same in-room step (a preset library may live as session-room config). It **never** participates in the duration `Calculated` tier — presets carry no `minutes`. (See §[`ResolvedPresentationTiming`](#resolvedpresentationtiming) and the two-tier note there.)
+
+## Composing sources — the per-(phase, prop) precedence ladder
+
+For each phase, the effective config is assembled **per prop** over `{label, cues, timerHints, load}`. Props are sourced **independently and merge *across* the phase**; within any single prop the winning value is used **whole** (arrays never element-merge or concatenate; an explicit `[]` counts as *present* and overrides). *Example:* a preset supplies `intro`'s `label`/`load`/`cues`/`timerHints`, and an explicit `prPhases.intro = { cues: [...] }` overrides **only** `intro`'s cues — its other three props still come from the preset.
+
+The rungs — **first present wins, per prop** (the **preset** is the new rung 2):
+
+| # | Rung | `cues` / `timerHints` | `label` | `load` |
+| :- | :- | :- | :- | :- |
+| 1 | explicit | `prPhases.<phase>.{cues\|cuesRef}` (resp. `timerHints`) | `prPhases.<phase>.label` | `prPhases.<phase>.load` |
+| 2 | **preset** | `‹preset›.<phase>.{cues\|timerHints}` | `‹preset›.<phase>.label` | `‹preset›.<phase>.load` |
+| 3 | session default | `ssPhaseDefaults.<phase>.{cues\|cuesRef}` (resp. `timerHints`) | — | — |
+| 4 | library default | `ssCueSets`/`HintSets.<phase>.default` else `mt*` | — | — |
+| 5 | none | phase has no cues/hints | built-in phase name (UI) | effective `ignore` |
+
+- **`label`/`load` have no session-default or library-default rung.** `SessionPhaseDefault` is a cue/hint policy only (see §[Session-level defaults](#session-level-defaults)); `label` falls back to the built-in phase name, and `load`'s session-wide defaulting is the room's job (host `phaseLoading`, **downstream**). So those two props resolve `explicit → preset → fallback`.
+- **Inline vs ref at one rung** (rungs 1 & 3, `cues`/`timerHints` only) is a discriminated pair — *either* the inline array *or* the `*Ref`, never both; if both are somehow set, the **inline array wins** + `resolverNotes`.
+- **Ref & preset-key resolution** — any `*Ref`, the rung-4 `default` key, and the `prPhasesPreset` key all resolve in the **session** library then the **meeting** library; the session shadows the meeting for the same key.
+- **Dangling / absent falls through.** A `*Ref` (or a `default`, or the `prPhasesPreset` key) whose key is in neither library — **or** a rung that simply doesn't speak to a prop (e.g. the preset exists but has no `intro.cues`) — contributes nothing for that prop and resolution **falls through to the next rung** (+`resolverNotes` on a genuine dangling ref). It never blanks the prop and never throws (the resolver is total — see §[Reconciliation & the resolver](#reconciliation--the-resolver)).
+- **Percentages stay symbolic here.** This selection *carries/derefs* the chosen array verbatim; any minutes-or-percent values are resolved to concrete minutes **by the timer at runtime** — their denominators (a floor/cap's calculated minutes; a cue's live starting value) mature only at/after phase start — never baked into the resolved data.
 
 ## `ResolvedPresentationTiming`
 
-The **simple-fallback tier** — distinct from the complex resolver above, this is an ordinary instance of the Resolved Types Pattern (§3): it applies the **precedence ladder** (above) to fill each phase's effective `cues`/`timerHints`, wrapping a presentation's `PresentationCalculatedTiming`.
+The **simple-fallback tier** — distinct from the complex duration resolver above, this is an ordinary instance of the Resolved Types Pattern (§3): it runs the **per-(phase, prop) ladder** (above) to fill each phase's effective `label`/`load`/`cues`/`timerHints`, paired with the phase's computed timing. It carries **no `*Ref`** — refs (and any `prPhasesPreset`) are resolved away here.
 
 ```ts
-export type ResolvedPresentationPhase = PresentationCalculatedPhase & {
-  cues?: PresentationPhaseCue[];             // effective per the precedence ladder (percentages kept symbolic)
-  timerHints?: PresentationPhaseTimerHint[]; // effective per the precedence ladder
-}
+export type ResolvedPresentationPhase = PresentationPhaseBase & PhaseCalculatedTiming; // base props hold effective (deref'd) values; NO *Ref
 export type ResolvedPresentationPhases = { intro?: ResolvedPresentationPhase; talk?: ResolvedPresentationPhase; qa?: ResolvedPresentationPhase };
 export type ResolvedPresentationTiming = { phases: ResolvedPresentationPhases; fit: PhaseFit; resolverNotes: string[] };
 ```
 
-This tier **selects** arrays; it does not evaluate percentages or compute the effective allocation. The chosen `cues`/`timerHints` are carried verbatim, with any `TimingQuantity`/`atUnits` still symbolic, for the timer to resolve at runtime. `fit` and `resolverNotes` pass straight through from the `PresentationCalculatedTiming` this tier wraps; the ladder adds only its own dangling-ref / literal-wins diagnostics.
+This tier **selects and derefs** sources; it does not evaluate percentages or compute the effective allocation. The chosen `cues`/`timerHints` are carried verbatim, with any `TimingQuantity`/`atUnits` still symbolic for the timer to resolve at runtime; `label`/`load` hold the ladder's effective values. `fit` and `resolverNotes` pass straight through from the `PresentationCalculatedTiming` this tier wraps; the ladder adds only its own dangling-ref / literal-wins diagnostics.
 
-Callers supply the presentation's `prPhasesCalculated`, the session's `ssPhaseDefaults`/`ss*Sets`, and the meeting's `mt*Sets`; the merge/lookup function itself is left to the caller — out of this spec's scope, same as the rest of timer runtime behavior.
+Callers supply the presentation's `prPhasesCalculated`, its `prPhasesPreset` + the `mt/ssPhasePresets` libraries, the session's `ssPhaseDefaults`/`ss*Sets`, and the meeting's `mt*Sets`; the merge/lookup function itself is left to the caller — out of this spec's scope, same as the rest of timer runtime behavior.
+
+### Calculated vs Resolved — why two tiers
+
+The split is deliberate. **Duration calc** depends only on the presentation's own data (`prPhases` + the block), so it is upstream-computable and cached in `prPhasesCalculated`. **Cue/hint ref *and* preset deref**, by contrast, needs the named-set / preset **library** — which is deliberately allowed to live as **session-room config**, making it an *in-room* step. Collapsing the two tiers would force the whole array/preset library to travel with upstream presentation data and defeat the single-string affordance (`cuesRef`/`timerHintsRef`/`prPhasesPreset`) the model is built around. Hence `Calculated` = durations (plus the phase's own cue/hint sources carried forward, unresolved); `Resolved` = ladder + deref, in-room. **Presets and refs touch only the `Resolved` tier — never durations.**
 
 ## What this spec doesn't cover
 
 - **Timer runtime behavior/UX** — how cues render (chimes, colors, sounds), the countdown display, live overrun-handling, runtime per-phase overrides, and the actual squeeze/merge algorithms that interpret `timerHints`/`ResolvedPresentationTiming` during a live session.
+- **`load` runtime resolution** — the full precedence (`explicit > preset > host `phaseLoading` > ignore`), the `timerAutomation` kill-switch, the per-value behavior (including `auto-paused`'s hold and its `remaining`-basis exception), and the room-level `phaseLoading` config all live **downstream** (mtng-dotnet-mono `Compose/MtngTools.Compose.TimerManager`). This spec fixes only the value set and the `ignore` default.
 - **Per-phase performer attribution** — phases carry timing/label/cue/hint data only; `ssModerators`/`prModerators` already exist at the session/presentation level.
 - **Agenda UI implementation** and **speaker-timer implementation**.
