@@ -54,7 +54,7 @@ export type PresentationPhases = { intro?: PresentationPhase; talk?: Presentatio
 
 ### `minutes` value semantics
 
-A single raw number, dual-encoded (DB-friendly wire format ⇄ a TS discriminated union restored by the resolver):
+A single raw number, dual-encoded (DB-friendly wire format ⇄ a TS discriminated union restored by the resolver). The union is **`PhaseMinutes`**, with `decodePhaseMinutes`/`encodePhaseMinutes` in [`meeting.ts`](../../meeting.ts); the sentinels live only for the width of a decode call and never reach logic in either language (ADR-0005; C# mirror per mtng-dotnet-mono ADR-0012):
 
 | Raw value | Meaning |
 | :--- | :--- |
@@ -62,6 +62,8 @@ A single raw number, dual-encoded (DB-friendly wire format ⇄ a TS discriminate
 | `> 0` | Concrete minutes (fractions allowed, e.g. `0.5`) |
 | `−1` | `fill` — elastic, absorbs remaining block time |
 | `−2` | `no-time` — shown, but off the committed clock (contributes 0, no countdown) |
+
+**Unrecognized negatives decode to *absent*.** Any negative other than `−1`/`−2` (a future sentinel, a bad export) degrades to `absent` rather than throwing — the decode is total, matching the resolver. Both language implementations must agree here; the round-trip is corpus-covered.
 
 **At most one `fill` per presentation.** `≥ 2 fill` is invalid but non-fatal: the resolver normalizes by phase priority `talk > qa > intro` (the winner keeps `fill`, others become `no-time`) and records a `resolverNotes` diagnostic. The resolver is **total** — malformed input degrades gracefully, it never throws. See [calculation-scenarios.md](calculation-scenarios.md) for the full 64-scenario catalog (every `{absent, concrete, fill, no-time}` combination across the three phases) this reconciliation model was validated against.
 

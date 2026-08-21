@@ -16,7 +16,10 @@ Avoid on these types: magic-number sentinels (`-1`/`-2` in one field), `[key: st
 
 Cheaper future port; explicit shapes that also read better in TS. Existing types (e.g. `minutes`' sentinels) need not change until next touched.
 
+**`minutes` — deferral resolved (2026-08-20).** Building the C# resolver touched it. The sentinels **stay on the wire** (a deliberate DB-friendly authoring encoding), and each language decodes at the boundary into an explicit union — `PhaseMinutes` in TS, its C# counterpart downstream — so no magic number reaches either language's logic. See mtng-dotnet-mono [ADR-0012](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/spec/adr/0012-cross-language-timing-resolver.md).
+
 ## Related
 
 - [`presentation-timing/README.md`](../../packages/core/src/data/spec/presentation-timing/README.md) — the worked example.
+- mtng-dotnet-mono [ADR-0012](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/spec/adr/0012-cross-language-timing-resolver.md) — how the ported resolver is held in parity (conformance corpus, not codegen). This ADR says *design so it can port*; that one says *how the port stays in step*.
 - [Spec README](../README.md)
