@@ -165,6 +165,35 @@ export type PresentationPhase = Simplify<PresentationPhaseBase & HasTimerCueHint
                          //   (shown, off the committed clock)
 }>;
 
+// The decoded counterpart of `PresentationPhase.minutes` — the explicit union the raw dual-encoding
+// restores to (ADR-0005: no magic-number sentinels in logic). The sentinels stay on the wire because a
+// speaker DB can store one number but not a tagged object; they live only for the width of a decode call.
+// The C# side mirrors this union; the decode/encode round-trip is covered by the shared conformance corpus
+// (mtng-dotnet-mono ADR-0012).
+export type PhaseMinutes =
+    | { kind: 'absent' }                        // 0 · omitted · absent key — phase doesn't exist
+    | { kind: 'concrete', minutes: number }     // > 0, fractions allowed
+    | { kind: 'fill' }                          // −1 — elastic, absorbs remaining block time
+    | { kind: 'no-time' };                      // −2 — shown, off the committed clock
+
+// Total, like the resolver: an unrecognized negative degrades to 'absent' rather than throwing.
+export function decodePhaseMinutes(raw: number | undefined): PhaseMinutes {
+    if (raw === undefined || raw === 0) return { kind: 'absent' };
+    if (raw > 0) return { kind: 'concrete', minutes: raw };
+    if (raw === -1) return { kind: 'fill' };
+    if (raw === -2) return { kind: 'no-time' };
+    return { kind: 'absent' };
+}
+
+export function encodePhaseMinutes(m: PhaseMinutes): number | undefined {
+    switch (m.kind) {
+        case 'absent':   return undefined;
+        case 'concrete': return m.minutes;
+        case 'fill':     return -1;
+        case 'no-time':  return -2;
+    }
+}
+
 export type PresentationPhases = {
     intro?: PresentationPhase,
     talk?: PresentationPhase,
