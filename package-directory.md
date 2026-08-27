@@ -120,6 +120,7 @@ The **Produce** domain's .NET surface (desktop apps, the local controller and it
 | Package | Description | Repo | Status |
 | :--- | :--- | :--- | :--- |
 | `MtngTools.Core.Backbone` | The backbone port every Manager and Client depends on instead of a broker; derives its own exchange and routing key from the message ([spec](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/src/spec/Core/MtngTools.Core.Backbone/README.md)). | [mtng-dotnet-mono](https://github.com/mtngtools/mtng-dotnet-mono) | alpha |
+| `MtngTools.Core.Folders` | Stage 0: resolves and seeds the closed set of `MT*` folder variables into the process environment before configuration or DI exist, so a config string can compose against `%MTApplicationLogFolder%` on every OS ([spec](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/src/spec/Core/MtngTools.Core.Folders/README.md)). | [mtng-dotnet-mono](https://github.com/mtngtools/mtng-dotnet-mono) | alpha |
 | `MtngTools.Core.Wire` | Mechanical C# mirror of the TS/Zod wire contract, generated from `mtng-wire-schemas`; carries the timer message set ([spec](https://github.com/mtngtools/mtng-dotnet-mono/blob/main/src/spec/Core/MtngTools.Core.Wire/README.md)). | [mtng-dotnet-mono](https://github.com/mtngtools/mtng-dotnet-mono) | alpha |
 
 [^1]: These packages live in the **hls** repository, not the main monorepo.
